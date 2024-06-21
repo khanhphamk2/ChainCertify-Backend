@@ -1,0 +1,109 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        address:
+          type: string
+          format: address
+        name:
+          type: string
+        identity_number:
+          type: string
+        dob:
+          type: string
+          format: date
+        is_issuer:
+          type: boolean
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string
+
+    Certificate:
+      type: object
+      properties:
+        hash: 
+          type: string
+        holder_name:
+          type: string
+        dob:
+          type: string
+          format: date
+        identity_number:
+          type: string
+        holder_address:
+          type: string
+        issuer_address:
+          type: string
+        credemtial_url:
+          type: string
+        score:
+          type: number
+        issue_date:
+          type: string
+          format: date
+        expire_date: 
+          type: string
+          format: date
+        is_revoked:
+          type: boolean
+        note:
+          type: string
+
+  responses:
+    DuplicateID:
+      description: Identity number already taken
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 400
+            message: Identity number already taken
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 400
+            message: Bad request
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 401
+            message: Please authenticate
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 403
+            message: Forbidden
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 404
+            message: Not found
+
+  # securitySchemes:
+  #   bearerAuth:
+  #     type: http
+  #     scheme: bearer
+  #     bearerFormat: JWT

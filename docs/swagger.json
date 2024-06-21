@@ -1,0 +1,831 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API documentation",
+    "version": "1.0.0",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/hagopj13/node-express-boilerplate/blob/master/LICENSE"
+    },
+    "description": "Documentation for RESTful API"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/v1",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/credential/address": {
+      "post": {
+        "summary": "Create a new credential",
+        "description": "Create a new credential for a holder.",
+        "tags": [
+          "Certificate"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "address_issuer",
+                  "holder_name",
+                  "dob",
+                  "identity_number",
+                  "holder_address",
+                  "score",
+                  "note"
+                ],
+                "properties": {
+                  "address_issuer": {
+                    "type": "string",
+                    "description": "Address wallet of the issuer"
+                  },
+                  "holder_name": {
+                    "type": "string",
+                    "description": "Name of the holder"
+                  },
+                  "dob": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Date of birth of the holder"
+                  },
+                  "identity_number": {
+                    "type": "string",
+                    "description": "Identity number of the holder"
+                  },
+                  "holder_address": {
+                    "type": "string",
+                    "description": "Address wallet of the holder"
+                  },
+                  "score": {
+                    "type": "number",
+                    "description": "Score of the holder"
+                  },
+                  "note": {
+                    "type": "string",
+                    "description": "Note of the holder"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Credential created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Certificate"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all credentials for a Holder",
+        "description": "Retrieve all credentials.",
+        "tags": [
+          "Certificate"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "address_issuer",
+                  "holder_address"
+                ],
+                "properties": {
+                  "address_issuer": {
+                    "type": "string",
+                    "description": "Address wallet of the issuer"
+                  },
+                  "holder_address": {
+                    "type": "string",
+                    "description": "Address wallet of the holder"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "All credentials retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/components/schemas/Certificate"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/credential/address/{hash}": {
+      "get": {
+        "summary": "Get credential by hash value for a holder address",
+        "description": "Retrieve a credential for a specific holder based on their address and hash value.",
+        "tags": [
+          "Certificate"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hash",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hash of the credential to get for holder address"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "address_issuer",
+                  "holder_address"
+                ],
+                "properties": {
+                  "address_issuer": {
+                    "type": "string",
+                    "description": "Address wallet of the issuer"
+                  },
+                  "holder_address": {
+                    "type": "string",
+                    "description": "Address wallet of the holder"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credentials retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Certificate"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "summary": "Revoke a credential by hash",
+        "description": "Revoke an existing credential using its hash.",
+        "tags": [
+          "Certificate"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hash",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hash of the credential to revoke"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "address_issuer",
+                  "holder_address",
+                  "note"
+                ],
+                "properties": {
+                  "address_issuer": {
+                    "type": "string",
+                    "description": "Address wallet of the issuer"
+                  },
+                  "holder_address": {
+                    "type": "string",
+                    "description": "Address wallet of the holder"
+                  },
+                  "note": {
+                    "type": "string",
+                    "description": "The reason for revoking the credential"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credential revoked successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Credential revoked successfully"
+                    },
+                    "hash": {
+                      "type": "string",
+                      "description": "The hash of the revoked credential"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/holders": {
+      "get": {
+        "summary": "Get holder's credentials",
+        "description": "Retrieve the credentials of the holder.",
+        "tags": [
+          "Holder"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "address_issuer",
+                  "holder_address"
+                ],
+                "properties": {
+                  "address_issuer": {
+                    "type": "string",
+                    "description": "Address wallet of the issuer"
+                  },
+                  "holder_address": {
+                    "type": "string",
+                    "description": "Address wallet of the holder"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "All credentials retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/components/schemas/Certificate"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/holders/{hash}": {
+      "get": {
+        "summary": "Get holder's credentials by hash",
+        "description": "Retrieve the credentials of the holder by hash.",
+        "tags": [
+          "Holder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hash",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hash of the credential"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "address_issuer",
+                  "holder_address"
+                ],
+                "properties": {
+                  "address_issuer": {
+                    "type": "string",
+                    "description": "Address wallet of the issuer"
+                  },
+                  "holder_address": {
+                    "type": "string",
+                    "description": "Address wallet of the holder"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Holder's credentials retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Certificate"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "summary": "Request to modify credential",
+        "description": "Request to modify a credential by the holder.",
+        "tags": [
+          "Holder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hash",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hash of the credential"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "address_issuer",
+                  "holder_address",
+                  "modifications"
+                ],
+                "properties": {
+                  "address_issuer": {
+                    "type": "string",
+                    "description": "Address wallet of the issuer"
+                  },
+                  "holder_address": {
+                    "type": "string",
+                    "description": "Address wallet of the holder"
+                  },
+                  "modifications": {
+                    "type": "object",
+                    "description": "Object containing modification details",
+                    "properties": {
+                      "holder_name": {
+                        "type": "string",
+                        "description": "Name of the holder"
+                      },
+                      "dob": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Date of birth of the holder"
+                      },
+                      "identity_number": {
+                        "type": "string",
+                        "description": "Identity number of the holder"
+                      },
+                      "score": {
+                        "type": "number",
+                        "description": "Score of the holder"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Modification request submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message confirming the modification request."
+                    },
+                    "modifications": {
+                      "type": "object",
+                      "description": "Object containing modification details",
+                      "properties": {
+                        "holder_name": {
+                          "type": "string",
+                          "description": "Name of the holder"
+                        },
+                        "dob": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "Date of birth of the holder"
+                        },
+                        "identity_number": {
+                          "type": "string",
+                          "description": "Identity number of the holder"
+                        },
+                        "score": {
+                          "type": "number",
+                          "description": "Score of the holder"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/issuer": {
+      "post": {
+        "summary": "Add an issuer.",
+        "description": "Add an issuer.",
+        "tags": [
+          "Issuer"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "msgSender",
+                  "address"
+                ],
+                "properties": {
+                  "msgSender": {
+                    "type": "string",
+                    "description": "The message sender (address of the issuer)"
+                  },
+                  "address": {
+                    "type": "string",
+                    "description": "The holder's address"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Issuer added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message confirming the addition of the issuer."
+                    },
+                    "new_issuer": {
+                      "type": "string",
+                      "description": "The address of the new issuer."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all Ethereum addresses of issuers",
+        "description": "Retrieve a list of all Ethereum addresses of issuers.",
+        "tags": [
+          "Issuer"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved Ethereum addresses of issuers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "An Ethereum address"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "format": "address"
+          },
+          "name": {
+            "type": "string"
+          },
+          "identity_number": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "string",
+            "format": "date"
+          },
+          "is_issuer": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Certificate": {
+        "type": "object",
+        "properties": {
+          "hash": {
+            "type": "string"
+          },
+          "holder_name": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "string",
+            "format": "date"
+          },
+          "identity_number": {
+            "type": "string"
+          },
+          "holder_address": {
+            "type": "string"
+          },
+          "issuer_address": {
+            "type": "string"
+          },
+          "credemtial_url": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "expire_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "is_revoked": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "responses": {
+      "DuplicateID": {
+        "description": "Identity number already taken",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 400,
+              "message": "Identity number already taken"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 400,
+              "message": "Bad request"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 401,
+              "message": "Please authenticate"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 403,
+              "message": "Forbidden"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 404,
+              "message": "Not found"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Certificate",
+      "description": "Certificate management"
+    },
+    {
+      "name": "Holder",
+      "description": "Holder management"
+    },
+    {
+      "name": "Issuer",
+      "description": "Issuer management"
+    }
+  ]
+}
