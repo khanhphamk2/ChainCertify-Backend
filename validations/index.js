@@ -1,1 +1,2 @@
-module.exports.holderValidation = require('./holder.validation');
+module.exports.issuerValidation = require('./issuer.validation');
+module.exports.credValidation = require('./credential.validation');

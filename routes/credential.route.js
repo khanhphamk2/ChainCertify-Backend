@@ -1,11 +1,12 @@
 const express = require('express');
 const credentialController = require('../controllers/credential.controller');
+const upload = require('../middlewares/upload');
 
 const router = express.Router();
 
 router
     .route('/address')
-    .post(credentialController.issueCredential)
+    .post(credentialController.issueCredential, upload.single('fileUrl'))
     .get(credentialController.getCredentialsByHolderAddress);
 
 router.route('/address/:hash')

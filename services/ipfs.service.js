@@ -1,20 +1,18 @@
-const { get } = require('mongoose');
+const { ACCESS_TOKEN, PINATA_JWT_KEY } = require('../config/config');
+const axios = require('axios');
 const pinataSDK = require('@pinata/sdk');
 const fs = require('fs');
-const JWT = "PASTE_YOUR_PINATA_JWT";
-const pinata = new pinataSDK('yourPinataApiKey', 'yourPinataSecretApiKey');
-// const pinata = new pinataSDK({ pinataJWTKey: 'yourPinataJWTKey' });
 
-const getFile = async (ipfsHash) => {
-    try {
-        const res = await fetch(
-            "https://mygateway.mypinata.cloud/ipfs/" + ipfsHash
-        );
-        const resData = await res.text();
-        console.log(resData);
-    } catch (error) {
-        console.log(error);
-    }
+const pinata = new pinataSDK({ pinataJWTKey: PINATA_JWT_KEY });
+
+const getFileJSON = async (CID) => {
+    axios.get(`https://black-delicate-hamster-859.mypinata.cloud/ipfs/${CID}?pinataGatewayToken=${ACCESS_TOKEN}`)
+        .then((response) => {
+            console.log(response.json());
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 }
 
 const testConnect = async () => {
@@ -45,7 +43,7 @@ const pinFileToIPFS = async (filePath) => {
 
         const res = await pinata.pinFileToIPFS(readableStreamForFile, options);
 
-        console.log(res);
+        return res;
     } catch (error) {
         console.log(error);
     }
@@ -65,8 +63,8 @@ const pinFromFS = async (sourcePath) => {
                 cidVersion: 0
             }
         };
-        const res = await pinata.pinFromFS(sourcePath, options)
-        console.log(res)
+        const res = await pinata.pinFromFS(sourcePath, options);
+        return res;
     } catch (error) {
         console.log(error);
     }
@@ -77,17 +75,13 @@ const pinJSONToIPFS = async (jsonObject, customName) => {
         const options = {
             pinataMetadata: {
                 name: customName,
-                keyvalues: {
-                    customKey: 'customValue',
-                    customKey2: 'customValue2'
-                }
             },
             pinataOptions: {
                 cidVersion: 0
             }
         };
         const res = await pinata.pinJSONToIPFS(jsonObject, options);
-        console.log(res);
+        return res;
     } catch (error) {
         console.log(error);
     }
@@ -96,7 +90,7 @@ const pinJSONToIPFS = async (jsonObject, customName) => {
 const userPinnedDataTotal = async () => {
     try {
         const res = await pinata.userPinnedDataTotal();
-        console.log(res);
+        return res;
     } catch (error) {
         console.log(error);
     }
@@ -105,14 +99,31 @@ const userPinnedDataTotal = async () => {
 const unpin = async (cid) => {
     try {
         const res = await pinata.unpin(cid);
-        console.log(res);
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const hashMetadata = async (ipfsHash, data) => {
+    try {
+        const metadata = {
+            name: 'new custom name',
+            keyvalues: {
+                newKey: 'newValue',
+                existingKey: 'newValue',
+                existingKeyToRemove: null
+            }
+        };
+        const res = await pinata.hashMetadata(ipfsHash, metadata);
+        return res;
     } catch (error) {
         console.log(error);
     }
 }
 
 module.exports = {
-    getFile,
+    getFileJSON,
     testConnect,
     pinFileToIPFS,
     pinFromFS,

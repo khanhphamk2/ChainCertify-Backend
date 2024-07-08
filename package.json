@@ -35,10 +35,13 @@
         "ipfs-http-client": "^60.0.1",
         "joi": "^17.12.2",
         "jsonwebtoken": "^9.0.2",
+        "keccak": "^3.0.4",
         "mongodb": "^6.5.0",
         "mongoose": "^8.2.3",
+        "multer": "^1.4.5-lts.1",
         "passport": "^0.7.0",
         "passport-jwt": "^4.0.1",
+        "path": "^0.12.7",
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^5.0.0",
         "winston": "^3.12.0"

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const CredentialSchema = new mongoose.Schema({
-    id : {
+    id: {
         type: String,
         required: true,
     },
@@ -24,10 +24,6 @@ const CredentialSchema = new mongoose.Schema({
         required: true,
     },
     publishedDate: {
-        type: Date,
-        required: true,
-    },
-    expirationDate: {
         type: Date,
         required: true,
     },

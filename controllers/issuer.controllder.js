@@ -12,7 +12,7 @@ const addIssuer = catchAsync(async (req, res) => {
 });
 
 const getIssuers = catchAsync(async (req, res) => {
-    const issuers = issuerService.getIssuers();
+    const issuers = issuerService.getIssuers(req.body.msgSender);
     res.status(httpStatus.OK).send(issuers);
 });
 

@@ -5,7 +5,7 @@ const abiIssuer = require('../utils/ABI/issuer.json');
 const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
 
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
-const contract = new ethers.Contract(config.L1_ISSUER, abiIssuer, wallet);
+const contract = new ethers.Contract(config.LOCAL_ISSUER_CON_ADDR, abiIssuer, wallet);
 
 /**
  * Add a new issuer
@@ -13,21 +13,28 @@ const contract = new ethers.Contract(config.L1_ISSUER, abiIssuer, wallet);
  * @param {string} issuer 
  * @returns {Promise<Object>}
  */
+
 const addIssuer = async (msgSender, issuer) => {
-    const receipt = await contract.methods
-        .addIssuer(issuer)
-        .send({ from: msgSender});
-    await receipt.wait();
-    console.log("Add issuer transaction receipt:", receipt);
-    return receipt.hash;
+    try {
+        const tx = await contract.addIssuer(issuer, { from: msgSender });
+        const receipt = await tx.wait();
+        console.log("Add issuer transaction receipt:", receipt);
+        return receipt;
+    } catch (error) {
+        console.error("Error adding issuer:", error);
+        throw error;
+    }
 };
 
-const getIssuers = async () => {
-    return await contract.getIssuers();
+const getIssuers = async (msgSender) => {
+    const tx = await contract.getIssuers({ from: msgSender });
+    const issuers = await tx.wait();
+    console.log("Issuers:", issuers);
+    return issuers;
 };
 
-const revokeIssuer = async (issuer) => {
-    const tx = await contract.revokeIssuer(issuer);
+const revokeIssuer = async (msgSender, issuer) => {
+    const tx = await contract.revokeIssuer(issuer, { from: msgSender });
     await tx.wait();
     return tx.hash;
 };

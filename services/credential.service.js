@@ -1,35 +1,78 @@
 const httpStatus = require('http-status');
 const config = require('../config/config');
 const ApiError = require('../utils/ApiError');
-const ethers = require('ethers');
+const { ethers } = require('ethers');
 const abi = require('../utils/ABI/certificate.json');
+const keccak256 = require('keccak');
+const { ipfsService } = require('../services');
+const path = require('path');
 
 const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
-const contract = new ethers.Contract(config.L1_CERT, abi, wallet);
+const contract = new ethers.Contract(config.LOCAL_CRED_CON_ADDR, abi, wallet);
 
-const issueCredential = async (reqBody) => {
+const hashInfo = async (info) => {
+    const hash = keccak256(info.name + info.identity_number + info.institution + info.type + info.score + info.expireDate + info.note + info.ipfsPDF).toString('hex');
+    return hash;
+};
+
+/**
+ * Generate keccak256 hash of a JSON object
+ * @param {Object} jsonObject 
+ * @returns {string} Keccak256 hash
+ */
+const hashJsonObject = (jsonObject) => {
+    const jsonString = JSON.stringify(jsonObject);
+    const jsonBytes = ethers.utils.toUtf8Bytes(jsonString);
+    return ethers.utils.keccak256(jsonBytes);
+};
+
+const issueCredential = async (reqBody, file) => {
     try {
-        const gas = await certificatesContract.methods
-            .issueCertificate(reqBody.holder, reqBody.fileUrl, reqBody.score, reqBody.expireDate)
-            .estimateGas({
-                from: reqBody.msgSender
-            });
+        const certPath = path.join(__dirname, '..', 'uploads', file.filename);
+        const ipfsPDF = await ipfsService.pinFileToIPFS(certPath);
 
-        const receipt = await contract.methods
-            .issueCertificate(reqBody.holder, reqBody.fileUrl, reqBody.score, reqBody.expireDate)
-            .send({
-                from: reqBody.publicKey,
-                gas: gas
-            });
-
-        console.log("Certificate issued successfully with transaction hash:", receipt.transactionHash);
-
-        return {
-            status: 'success',
-            message: 'Credential Issued Successfully!',
-            result: receipt.events.IssuedCertificate.returnValues._certificateHash
+        const info = {
+            name: reqBody.name,
+            identity_number: reqBody.identityNumber,
+            institution: reqBody.institution,
+            type: reqBody.type,
+            score: reqBody.score,
+            expireDate: reqBody.expireDate,
+            note: reqBody.note,
+            ipfsPDF: ipfsPDF
         };
+
+        const cert = {
+            holder: reqBody.holder,
+            pdf: ipfsPDF,
+            info: info
+        };
+
+        const hashInfo = hashJsonObject(info);
+
+        const ipfsHash = await ipfsService.pinJSONToIPFS(cert, hashInfo);
+
+        // const gas = await contract.issueCertificate({ holder: reqBody.holder, ipfsHash, info })
+        //     .estimateGas({
+        //         from: reqBody.msgSender
+        //     });
+
+        // const receipt = await contract.issueCertificate(reqBody.holder, reqBody.fileUrl, reqBody.score, reqBody.expireDate)
+        //     .send({
+        //         from: reqBody.publicKey,
+        //         gas: gas
+        //     });
+
+        // console.log("Certificate issued successfully with transaction hash:", receipt.transactionHash);
+
+        // return {
+        //     status: 'success',
+        //     message: 'Credential Issued Successfully!',
+        //     result: receipt.events.IssuedCertificate.returnValues._certificateHash
+        // };
+
+        return { cert: cert, hashInfo: hashInfo, ipfsHash: ipfsHash };
     } catch (error) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error creating credential: ' + error.message);
     }
@@ -96,7 +139,7 @@ const revokeCredential = async (reqBody) => {
 module.exports = {
     issueCredential,
     // getCredentialsByHolderAddress,
-    getCredentialByHash,
-    revokeCredential,
+    // getCredentialByHash,
+    // revokeCredential,
     // verifyCredential
 };

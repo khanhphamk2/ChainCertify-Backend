@@ -8,11 +8,7 @@ const HolderSchema = new mongoose.Schema({
     dob: {
         type: String,
         required: true,
-    },
-    publishedDate: {
-        type: Date,
-        required: true,
-    },
+    }
 });
 
 module.exports = mongoose.model('Holder', HolderSchema);
