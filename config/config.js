@@ -17,12 +17,6 @@ const envVarsSchema = Joi.object()
         INFURA_API_KEY: Joi.string().required().description('Infura API key'),
         INFURA_SECRET_KEY: Joi.string().required().description('Infura API key secret'),
 
-        LOCAL_CRED_CONTRACT_ADDRESS: Joi.string().required().description('Credential contract address Local'),
-        LOCAL_ISSUER_CONTRACT_ADDRESS: Joi.string().required().description('Issuer contract address Local'),
-
-        L1_CRED_CONTRACT_ADDRESS: Joi.string().required().description('Credential contract address L1 tesnet'),
-        L1_ISSUER_CONTRACT_ADDRESS: Joi.string().required().description('Issuer contract address L1 tesnet'),
-
         L2_CRED_CONTRACT_ADDRESS: Joi.string().required().description('Certificates contract address L2 tesnet'),
         L2_ISSUER_CONTRACT_ADDRESS: Joi.string().required().description('Issuers contract address L2 tesnet'),
 
@@ -35,17 +29,6 @@ const envVarsSchema = Joi.object()
         IPFS_ACCESS_TOKEN_KEY_1: Joi.string().required().description('Access token key1'),
 
         FRAUD_DETECTION: Joi.string().required().description('Fraud detection url'),
-        LOCAL_FD: Joi.string().required().description('Fraud detection local url'),
-
-        JWT_SECRET: Joi.string().required().description('JWT secret key'),
-        JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
-        JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
-        JWT_RESET_PASSWORD_EXPIRATION_MINUTES: Joi.number()
-            .default(10)
-            .description('minutes after which reset password token expires'),
-        JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: Joi.number()
-            .default(10)
-            .description('minutes after which verify email token expires'),
     })
     .unknown();
 
@@ -69,9 +52,7 @@ module.exports = {
     PRIVATE_KEY: envVars.PRIVATE_KEY,
     // LOCAL
     RPC_LOCAL: envVars.LOCAL_RPC,
-    LOCAL_CRED_CON_ADDR: envVars.LOCAL_CRED_CONTRACT_ADDRESS,
-    LOCAL_ISSUER_CON_ADDR: envVars.LOCAL_ISSUER_CONTRACT_ADDRESS,
-    
+
     // Layer 1
     L1_RPC: envVars.L1_RPC,
     L1_CRED_CON_ADDR: envVars.L1_CRED_CONTRACT_ADDRESS,
@@ -90,13 +71,4 @@ module.exports = {
     IPFS_ACCESS_TOKEN_KEY_1: envVars.IPFS_ACC_TOK_1,
     // Fraud Detection
     FRAUD_DETECTION: envVars.FRAUD_DETECTION,
-    LOCAL_FD: envVars.LOCAL_FD,
-    // JWT
-    jwt: {
-        secret: envVars.JWT_SECRET,
-        accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
-        refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
-        resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
-        verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
-    }
 };

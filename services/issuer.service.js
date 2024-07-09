@@ -2,10 +2,10 @@ const config = require('../config/config');
 const ethers = require('ethers');
 const abiIssuer = require('../utils/ABI/issuer.json');
 
-const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
+const provider = new ethers.JsonRpcProvider(config.L2_RPC + config.INFURA_API_KEY);
 
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
-const contract = new ethers.Contract(config.LOCAL_ISSUER_CON_ADDR, abiIssuer, wallet);
+const contract = new ethers.Contract(config.L2_ISSUER_CON_ADDR, abiIssuer, wallet);
 
 /**
  * Add a new issuer

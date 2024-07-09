@@ -9,7 +9,7 @@ router
     .post(upload.single('pdfFile'), credentialController.issueCredential)
     .get(credentialController.getCredentialsByHolderAddress);
 
-router.route('/address/:hash')
+router.route('/address/certificate')
     .get(credentialController.getCredentialByHash)
     .put(credentialController.revokeCredential);
 

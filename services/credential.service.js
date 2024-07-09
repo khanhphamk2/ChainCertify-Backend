@@ -43,10 +43,22 @@ const issueCredential = async (reqBody, pdfFile) => {
         const tx = await contract.issueCertificate(reqBody.holder, ipfsHash.IpfsHash, hashInfo, { from: reqBody.msgSender });
 
         const receipt = await tx.wait();
+
+        let certHash = "";
+
+        const logs = receipt.logs.map(log => contract.interface.parseLog(log));
+
+        for (const log of logs) {
+            if (log.name === 'CertificateIssued') {
+                certHash = log.args._certificateHash;
+                console.log('Certificate hash:', log.args._certificateHash);
+            }
+        }
+
         return {
             status: 'success',
             message: 'Credential Issued Successfully!',
-            // certificateHash: receipt.events.CertificateIssued.returnValues._certificateHash,
+            certificateHash: certHash,
             result: receipt
         };
 
@@ -104,21 +116,27 @@ const getCredentialByHash = async (holder, credentialHash) => {
 
 const revokeCredential = async (reqBody) => {
     try {
-        const gasFee = await certificatesContract.methods
-            .revokeCertificate(reqBody.holder, reqBody.certificateHash)
-            .estimateGas({
-                from: reqBody.msgSender
-            });
+        const tx = await contract.revokeCertificate(reqBody.holder, reqBody.hash, {
+            from: reqBody.msgSender
+        })
+        const receipt = await tx.wait();
 
-        const receipt = await certificatesContract.methods
-            .revokeCertificate(reqBody.holder, reqBody.certificateHash)
-            .send({
-                from: reqBody.msgSender,
-                gas: gasFee,
-            });
+        const logs = receipt.logs.map(log => contract.interface.parseLog(log));
+        let _isRevoked = false;
+        for (const log of logs) {
+            if (log.name === 'RevokedCertificate') {
+                _isRevoked = log.args._isRevoked;
+                console.log('Certificate hash:', log.args._certificateHash);
+                console.log('args', log.args._isRevoked);
+            }
+        }
 
-        console.log("Certificate revoked successfully with transaction hash:", receipt.transactionHash);
-        return receipt.events.RevokedCertificate.returnValues._certificateHash;
+        return {
+            status: 'success',
+            message: 'Credential Revoked Successfully!',
+            isRevoked: _isRevoked,
+            result: receipt
+        };
     } catch (error) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error revoking credential: ' + error.message);
     }
@@ -129,6 +147,6 @@ module.exports = {
     issueCredential,
     // getCredentialsByHolderAddress,
     // getCredentialByHash,
-    // revokeCredential,
+    revokeCredential,
     // verifyCredential
 };

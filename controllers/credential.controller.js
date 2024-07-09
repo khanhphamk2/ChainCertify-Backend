@@ -10,7 +10,6 @@ const issueCredential = catchAsync(async (req, res) => {
     res.status(httpStatus.CREATED).json({ certificate: cert });
 });
 
-
 const getCredentialsByHolderAddress = catchAsync(async (req, res) => {
     const filter = pick(req.query, ['holderId']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -27,8 +26,8 @@ const getCredentialByHash = catchAsync(async (req, res) => {
 });
 
 const revokeCredential = catchAsync(async (req, res) => {
-    await credentialService.revokeCredential(req.body);
-    res.status(httpStatus.OK).send("Successfully revoked");
+    const result = await credentialService.revokeCredential(req.body);
+    res.status(httpStatus.OK).send(result);
 });
 
 module.exports = {

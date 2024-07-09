@@ -73,6 +73,12 @@
                 "internalType": "bytes32",
                 "name": "_certificateHash",
                 "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "_isRevoked",
+                "type": "bool"
             }
         ],
         "name": "RevokedCertificate",
