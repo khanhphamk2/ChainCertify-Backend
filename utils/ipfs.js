@@ -5,10 +5,10 @@ const fs = require('fs');
 
 const pinata = new pinataSDK({ pinataJWTKey: IPFS_JWT_KEY });
 
-const getFileJSON = async (CID) => {
-    return `https://black-delicate-hamster-859.mypinata.cloud/ipfs/${CID}?pinataGatewayToken=${IPFS_ACCESS_TOKEN_KEY_1}`;
-}
-
+const getFile = async (CID) => {
+    const url = `https://black-delicate-hamster-859.mypinata.cloud/ipfs/${CID}?pinataGatewayToken=${IPFS_ACCESS_TOKEN_KEY_1}`;
+    return url.toString();
+};
 const testConnect = async () => {
     try {
         const res = await pinata.testAuthentication();
@@ -110,7 +110,7 @@ const hashMetadata = async (ipfsHash, data) => {
 }
 
 module.exports = {
-    getFileJSON,
+    getFile,
     testConnect,
     pinFileToIPFS,
     pinFromFS,

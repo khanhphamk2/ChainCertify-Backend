@@ -1,26 +1,15 @@
-const { ipfsService } = require('../services');
+const ipfs = require('../utils/ipfs');
 
 async function main() {
 
-    const cert = {
-        holder: '0x1234567890',
-        pdf: 'QmX8Q7aZ7n1cYbQmZ2Fy4m7z7n1cYbQmZ2Fy4m7z',
-        info: {
-            name: 'John Doe',
-            identity_number: '1234567890',
-            institution: 'HCMUT',
-            type: 'Bachelor',
-            score: '3.5',
-            expireDate: '2025-12-31',
-            note: 'Good student',
-        }
+    const ipfsHash = {
+        IpfsHash: 'QmZdYiZQ3V7zL6v2JQZQpYbQ4YR6QH2Qz2m9Q2ZQZQZQZQ'
     }
+    console.log(ipfsHash.IpfsHash);
 
-    const hashInfo = 'dabfbc6efbb58f335d14fb39a478ca9182e48c7c6fb63561cf79b2d0cb610ac0';
+    const url = await ipfs.getFile(ipfsHash.IpfsHash);
 
-    const ipfsHash = await ipfsService.uploadJSONToIPFS(cert, hashInfo);
-
-    console.log("Certificate issued successfully with IPFS hash:", ipfsHash);
+    console.log(url);
 }
 
 main();

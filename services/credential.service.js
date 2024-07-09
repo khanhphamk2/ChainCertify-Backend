@@ -40,6 +40,8 @@ const issueCredential = async (reqBody, pdfFile) => {
 
         const ipfsHash = await ipfs.uploadJSONToIPFS(cert, customName);
 
+        const ipns = await ipfs.getFile(ipfsHash.IpfsHash);
+
         const tx = await contract.issueCertificate(reqBody.holder, ipfsHash.IpfsHash, hashInfo, { from: reqBody.msgSender });
 
         const receipt = await tx.wait();
@@ -59,7 +61,7 @@ const issueCredential = async (reqBody, pdfFile) => {
             status: 'success',
             message: 'Credential Issued Successfully!',
             certificateHash: certHash,
-            ipfs: ipfs.getFileJSON(ipfsHash.IpfsHash),
+            ipfs: ipns,
             result: receipt
         };
 

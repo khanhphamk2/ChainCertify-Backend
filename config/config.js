@@ -68,7 +68,7 @@ module.exports = {
     IPFS_JWT_KEY: envVars.IPFS_JWT_KEY,
     IPFS_API_KEY: envVars.IPFS_API_KEY,
     IPFS_API_SECRET_KEY: envVars.IPFS_API_SECRET_KEY,
-    IPFS_ACCESS_TOKEN_KEY_1: envVars.IPFS_ACC_TOK_1,
+    IPFS_ACCESS_TOKEN_KEY_1: envVars.IPFS_ACCESS_TOKEN_KEY_1,
     // Fraud Detection
     FRAUD_DETECTION: envVars.FRAUD_DETECTION,
 };
