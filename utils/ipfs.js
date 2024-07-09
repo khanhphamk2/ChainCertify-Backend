@@ -6,13 +6,7 @@ const fs = require('fs');
 const pinata = new pinataSDK({ pinataJWTKey: IPFS_JWT_KEY });
 
 const getFileJSON = async (CID) => {
-    axios.get(`https://black-delicate-hamster-859.mypinata.cloud/ipfs/${CID}?pinataGatewayToken=${IPFS_ACCESS_TOKEN_KEY_1}`)
-        .then((response) => {
-            console.log(response.json());
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+    return `https://black-delicate-hamster-859.mypinata.cloud/ipfs/${CID}?pinataGatewayToken=${IPFS_ACCESS_TOKEN_KEY_1}`;
 }
 
 const testConnect = async () => {

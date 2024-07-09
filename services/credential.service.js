@@ -59,6 +59,7 @@ const issueCredential = async (reqBody, pdfFile) => {
             status: 'success',
             message: 'Credential Issued Successfully!',
             certificateHash: certHash,
+            ipfs: ipfs.getFileJSON(ipfsHash.IpfsHash),
             result: receipt
         };
 
