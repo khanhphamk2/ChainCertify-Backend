@@ -9,9 +9,9 @@ router
     .post(upload.single('pdfFile'), credentialController.issueCredential)
     .get(credentialController.getCredentialsByHolderAddress);
 
-router.route('/address/certificate')
-    .get(credentialController.getCredentialByHash)
-    .put(credentialController.revokeCredential);
+router.route('/address/revoke').put(credentialController.revokeCredential);
+
+router.route('/address/:hash').get(credentialController.getCredentialByHash);
 
 // router.route('/address/verify').post(credentialController.verifyCredential);
 module.exports = router;
