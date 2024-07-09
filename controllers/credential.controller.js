@@ -4,11 +4,9 @@ const pick = require('../utils/pick');
 const catchAsync = require('../utils/catchAsync');
 const fs = require('fs');
 
-
 const issueCredential = catchAsync(async (req, res) => {
-    // const jsonData = JSON.parse(req.body.jsonData);
-    // const cert = await credentialService.issueCredential(jsonData, req.file);
-    const cert = await credentialService.issueCredential();
+    const jsonData = JSON.parse(req.body.jsonData);
+    const cert = await credentialService.issueCredential(jsonData, req.file);
     res.status(httpStatus.CREATED).json({ certificate: cert });
 });
 
