@@ -1,10 +1,10 @@
 const httpStatus = require('http-status');
 const config = require('../config/config');
 const ApiError = require('../utils/ApiError');
+const hashObject = require('../utils/hashObject');
 const { ethers } = require('ethers');
 const abi = require('../utils/ABI/certificate.json');
-const keccak256 = require('keccak');
-const { ipfsService } = require('../services');
+const ipfs = require('../utils/ipfs');
 const path = require('path');
 const fs = require('fs');
 
@@ -12,26 +12,10 @@ const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
 const contract = new ethers.Contract(config.LOCAL_CRED_CON_ADDR, abi, wallet);
 
-const hashInfo = async (info) => {
-    const hash = keccak256(info.name + info.identity_number + info.institution + info.type + info.score + info.expireDate + info.note + info.ipfsPDF).toString('hex');
-    return hash;
-};
-
-/**
- * Generate keccak256 hash of a JSON object
- * @param {Object} jsonObject 
- * @returns {string} Keccak256 hash
- */
-const hashJsonObject = (jsonObject) => {
-    const jsonString = JSON.stringify(jsonObject);
-    const jsonBytes = ethers.utils.toUtf8Bytes(jsonString);
-    return ethers.utils.keccak256(jsonBytes);
-};
-
-const issueCredential = async (reqBody, file) => {
+const issueCredential = async () => {
     try {
-        const cid = await ipfsService.pinFileToIPFS(file.path, file.filename);
-        fs.unlinkSync(file.path);
+        const pdfHash = await ipfs.pinFileToIPFS(pdfFile.path, pdfFile.filename);
+        fs.unlinkSync(pdfFile.path);
 
         const info = {
             name: reqBody.name,
@@ -41,42 +25,41 @@ const issueCredential = async (reqBody, file) => {
             score: reqBody.score,
             expireDate: reqBody.expireDate,
             note: reqBody.note,
-            ipfsPDF: cid
         };
 
         const cert = {
             holder: reqBody.holder,
-            pdf: cid,
+            pdf: pdfHash.IpfsHash,
             info: info
         };
 
-        const hashInfo = hashJsonObject(info);
+        const hashInfo = hashObject(info);
 
-        const ipfsHash = await ipfsService.pinJSONToIPFS(cert, hashInfo);
+        const customName = `${reqBody.holder}_${hashInfo.slice(2)}`;
 
-        console.log("Certificate issued successfully with IPFS hash:", ipfsHash);
-        console.log("Certificate issued successfully with hashInfo:", hashInfo);
-        console.log("Certificate issued successfully with cert:", cert);
-        // const gas = await contract.issueCertificate({ holder: reqBody.holder, ipfsHash, info })
-        //     .estimateGas({
-        //         from: reqBody.msgSender
-        //     });
+        const ipfsHash = await ipfs.uploadJSONToIPFS(cert, customName);
+        // const holder = "0x7F3A97FD9Ba255d0581cd5C66Af63aA335Aef7Ff";
+        // const msgSender = "0x8ee3dE1016175EEa28acB4FD6e1F9a4195F4404d";
+        // const hashInfo = "dabfbc6efbb58f335d14fb39a478ca9182e48c7c6fb63561cf79b2d0cb610ac0";
+        // const ipfsHash = "QmX8Q7aZ7n1cYbQmZ2Fy4m7z7n1cYbQmZ2Fy4m7z";
+        // console.log('Holder:', ethers.getAddress(holder.toLowerCase()));
+        // const gas = await contract.issueCertificate.estimateGas(ethers.getAddress(holder.toLowerCase()), ipfsHash, hashInfo, { from: ethers.getAddress(msgSender.toLowerCase()) });
+        // const tx = await contract.issueCertificate(
+        //     ethers.getAddress(holder.toLowerCase()),
+        //     ipfsHash,
+        //     hashInfo,
+        //     { from: ethers.getAddress(msgSender.toLowerCase()) }
+        // );
+        // console.log('Gas:', gas.toString());
+        // const estimatedGas = await tx.estimateGas({ from: ethers.getAddress(msgSender.toLowerCase()) });
 
-        // const receipt = await contract.issueCertificate(reqBody.holder, reqBody.fileUrl, reqBody.score, reqBody.expireDate)
-        //     .send({
-        //         from: reqBody.publicKey,
-        //         gas: gas
-        //     });
+        // console.log('Estimated Gas:', estimatedGas.toString());
 
-        // console.log("Certificate issued successfully with transaction hash:", receipt.transactionHash);
+        return {
+            status: 'success',
+            message: 'Credential Issued Successfully!'
+        };
 
-        // return {
-        //     status: 'success',
-        //     message: 'Credential Issued Successfully!',
-        //     result: receipt.events.IssuedCertificate.returnValues._certificateHash
-        // };
-
-        return "Done";
     } catch (error) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error creating credential: ' + error.message);
     }

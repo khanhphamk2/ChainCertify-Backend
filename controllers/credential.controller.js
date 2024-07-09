@@ -3,12 +3,13 @@ const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const catchAsync = require('../utils/catchAsync');
 const fs = require('fs');
-const { bool } = require('joi');
+
 
 const issueCredential = catchAsync(async (req, res) => {
-    const jsonData = JSON.parse(req.body.jsonData);
-    console.log(jsonData);
-    res.status(httpStatus.CREATED).json({ file: req.file, body: JSON.parse(req.body.jsonData) });
+    // const jsonData = JSON.parse(req.body.jsonData);
+    // const cert = await credentialService.issueCredential(jsonData, req.file);
+    const cert = await credentialService.issueCredential();
+    res.status(httpStatus.CREATED).json({ certificate: cert });
 });
 
 

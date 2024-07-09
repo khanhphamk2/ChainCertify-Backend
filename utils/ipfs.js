@@ -62,7 +62,7 @@ const pinFromFS = async (sourcePath) => {
     }
 }
 
-const pinJSONToIPFS = async (jsonObject, customName) => {
+const uploadJSONToIPFS = async (jsonObject, customName) => {
     try {
         const options = {
             pinataMetadata: {
@@ -74,7 +74,8 @@ const pinJSONToIPFS = async (jsonObject, customName) => {
         };
         const res = await pinata.pinJSONToIPFS(jsonObject, options);
         return res;
-    } catch (error) {
+    }
+    catch (error) {
         console.log(error);
     }
 }
@@ -119,7 +120,7 @@ module.exports = {
     testConnect,
     pinFileToIPFS,
     pinFromFS,
-    pinJSONToIPFS,
+    uploadJSONToIPFS,
     userPinnedDataTotal,
     unpin
 };
