@@ -6,7 +6,7 @@ const router = express.Router();
 
 router
     .route('/address')
-    .post(credentialController.issueCredential, upload.single('fileUrl'))
+    .post(upload.single('pdfFile'), credentialController.issueCredential)
     .get(credentialController.getCredentialsByHolderAddress);
 
 router.route('/address/:hash')

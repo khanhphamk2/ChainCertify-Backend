@@ -1,12 +1,12 @@
-const { ACCESS_TOKEN, PINATA_JWT_KEY } = require('../config/config');
+const { IPFS_ACCESS_TOKEN_KEY_1, IPFS_JWT_KEY } = require('../config/config');
 const axios = require('axios');
 const pinataSDK = require('@pinata/sdk');
 const fs = require('fs');
 
-const pinata = new pinataSDK({ pinataJWTKey: PINATA_JWT_KEY });
+const pinata = new pinataSDK({ pinataJWTKey: IPFS_JWT_KEY });
 
 const getFileJSON = async (CID) => {
-    axios.get(`https://black-delicate-hamster-859.mypinata.cloud/ipfs/${CID}?pinataGatewayToken=${ACCESS_TOKEN}`)
+    axios.get(`https://black-delicate-hamster-859.mypinata.cloud/ipfs/${CID}?pinataGatewayToken=${IPFS_ACCESS_TOKEN_KEY_1}`)
         .then((response) => {
             console.log(response.json());
         })
@@ -24,17 +24,13 @@ const testConnect = async () => {
     }
 }
 
-const pinFileToIPFS = async (filePath) => {
+const pinFileToIPFS = async (filePath, myCustomName) => {
     try {
         const readableStreamForFile = fs.createReadStream(filePath);
 
         const options = {
             pinataMetadata: {
-                name: MyCustomName,
-                keyvalues: {
-                    customKey: 'customValue',
-                    customKey2: 'customValue2'
-                }
+                name: myCustomName,
             },
             pinataOptions: {
                 cidVersion: 0
@@ -54,10 +50,6 @@ const pinFromFS = async (sourcePath) => {
         const options = {
             pinataMetadata: {
                 name: 'My Awesome Website',
-                keyvalues: {
-                    customKey: 'customValue',
-                    customKey2: 'customValue2'
-                }
             },
             pinataOptions: {
                 cidVersion: 0

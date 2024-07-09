@@ -6,6 +6,7 @@ const abi = require('../utils/ABI/certificate.json');
 const keccak256 = require('keccak');
 const { ipfsService } = require('../services');
 const path = require('path');
+const fs = require('fs');
 
 const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
@@ -29,8 +30,8 @@ const hashJsonObject = (jsonObject) => {
 
 const issueCredential = async (reqBody, file) => {
     try {
-        const certPath = path.join(__dirname, '..', 'uploads', file.filename);
-        const ipfsPDF = await ipfsService.pinFileToIPFS(certPath);
+        const cid = await ipfsService.pinFileToIPFS(file.path, file.filename);
+        fs.unlinkSync(file.path);
 
         const info = {
             name: reqBody.name,
@@ -40,12 +41,12 @@ const issueCredential = async (reqBody, file) => {
             score: reqBody.score,
             expireDate: reqBody.expireDate,
             note: reqBody.note,
-            ipfsPDF: ipfsPDF
+            ipfsPDF: cid
         };
 
         const cert = {
             holder: reqBody.holder,
-            pdf: ipfsPDF,
+            pdf: cid,
             info: info
         };
 
@@ -53,6 +54,9 @@ const issueCredential = async (reqBody, file) => {
 
         const ipfsHash = await ipfsService.pinJSONToIPFS(cert, hashInfo);
 
+        console.log("Certificate issued successfully with IPFS hash:", ipfsHash);
+        console.log("Certificate issued successfully with hashInfo:", hashInfo);
+        console.log("Certificate issued successfully with cert:", cert);
         // const gas = await contract.issueCertificate({ holder: reqBody.holder, ipfsHash, info })
         //     .estimateGas({
         //         from: reqBody.msgSender
@@ -72,7 +76,7 @@ const issueCredential = async (reqBody, file) => {
         //     result: receipt.events.IssuedCertificate.returnValues._certificateHash
         // };
 
-        return { cert: cert, hashInfo: hashInfo, ipfsHash: ipfsHash };
+        return "Done";
     } catch (error) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error creating credential: ' + error.message);
     }
