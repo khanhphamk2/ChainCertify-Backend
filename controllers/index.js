@@ -1,3 +1,3 @@
-// module.exports.holderController = require('./holder.controller');
-module.exports.issuerController = require('./issuer.controller');
+module.exports.holderController = require('./holder.controller');
+module.exports.issuerController = require('./issuer.controllder');
 module.exports.credentialController = require('./credential.controller');

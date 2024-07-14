@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 
-const HolderSchema = new mongoose.Schema({
-    name: {
+const holderSchema = new mongoose.Schema({
+    address: {
         type: String,
         required: true,
     },
-    dob: {
+    certHash: {
         type: String,
         required: true,
     }
 });
 
-module.exports = mongoose.model('Holder', HolderSchema);
+module.exports = mongoose.model('Holder', holderSchema);

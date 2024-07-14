@@ -7,7 +7,8 @@ const router = express.Router();
 router
     .route('/address')
     .post(upload.single('pdfFile'), credentialController.issueCredential)
-    .get(credentialController.getCredentialsByHolderAddress);
+
+router.route('/:address').get(credentialController.getCredentialsByHolderAddress);
 
 router.route('/address/revoke').put(credentialController.revokeCredential);
 
@@ -38,24 +39,22 @@ module.exports = router;
 *               jsonData:
 *                 type: object
 *                 required:
-*                   - address_issuer
-*                   - holder_name
-*                   - dob
-*                   - identity_number
-*                   - holder_address
+*                   - holderName
+*                   - id
+*                   - institution
+*                   - type
 *                   - score
 *                   - note
+*                   - expireDate
+*                   - holder
+*                   - msgSender
 *                 properties:
-*                   address_issuer:
-*                     type: string
-*                     description: Address wallet of the issuer
-*                   holder_name:
+*                   holderName:
 *                     type: string
 *                     description: Name of the holder
-*                   dob:
+*                   id:
 *                     type: string
-*                     format: date
-*                     description: Date of birth of the holder
+*                     description: Identity number
 *                   identity_number:
 *                     type: string
 *                     description: Identity number of the holder
@@ -87,45 +86,50 @@ module.exports = router;
 *         $ref: '#/components/responses/Forbidden'
 *       "404":
 *         $ref: '#/components/responses/NotFound'
- *   get:
- *     summary: Get all credentials for a Holder
- *     description: Retrieve all credentials.
- *     tags: [Certificate]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - address_issuer
- *               - holder_address
- *             properties:
- *               address_issuer:
- *                 type: string
- *                 description: Address wallet of the issuer
- *               holder_address:
- *                 type: string
- *                 description: Address wallet of the holder
- *     responses:
- *       "200":
- *         description: All credentials retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 $ref: '#/components/schemas/Certificate'
- *       "400":
- *         $ref: '#/components/responses/BadRequest'
- *       "401":
- *         $ref: '#/components/responses/Unauthorized'
- *       "403":
- *         $ref: '#/components/responses/Forbidden'
- *       "404":
- *         $ref: '#/components/responses/NotFound'
- */
+*/
+
+/**
+* @swagger
+* /credential/address:
+*   get:
+*     summary: Get all credentials for a holder
+*     description: Retrieve all credentials for a specific holder.
+*     tags: [Certificate]
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             required:
+*               - address_issuer
+*               - holder_address
+*             properties:
+*               address_issuer:
+*                 type: string
+*                 description: Address wallet of the issuer
+*               holder_address:
+*                 type: string
+*                 description: Address wallet of the holder
+*     responses:
+*       "200":
+*         description: All credentials retrieved successfully
+*         content:
+*           application/json:
+*             schema:
+*               type: array
+*               items:
+*                 $ref: '#/components/schemas/Certificate'
+*       "400":
+*         $ref: '#/components/responses/BadRequest'
+*       "401":
+*         $ref: '#/components/responses/Unauthorized'
+*       "403":
+*         $ref: '#/components/responses/Forbidden'
+*       "404":
+*         $ref: '#/components/responses/NotFound'
+*/
+
 
 /**
  * @swagger
@@ -163,22 +167,27 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *               type: object
  *               $ref: '#/components/schemas/Certificate'
- *       "400":
+ *       400:
  *         $ref: '#/components/responses/BadRequest'
- *       "401":
+ *       401:
  *         $ref: '#/components/responses/Unauthorized'
- *       "403":
+ *       403:
  *         $ref: '#/components/responses/Forbidden'
- *       "404":
+ *       404:
  *         $ref: '#/components/responses/NotFound'
+ */
+
+
+/**
+ * @swagger
+ * /address/revoke:
  *   put:
  *     summary: Revoke a credential by hash
  *     description: Revoke an existing credential using its hash.
  *     tags: [Certificate]
  *     parameters:
- *       - in: path
+ *       - in: query
  *         name: hash
  *         required: true
  *         schema:
@@ -218,12 +227,12 @@ module.exports = router;
  *                 hash:
  *                   type: string
  *                   description: The hash of the revoked credential
- *       "400":
+ *       400:
  *         $ref: '#/components/responses/BadRequest'
- *       "401":
+ *       401:
  *         $ref: '#/components/responses/Unauthorized'
- *       "403":
+ *       403:
  *         $ref: '#/components/responses/Forbidden'
- *       "404":
+ *       404:
  *         $ref: '#/components/responses/NotFound'
  */

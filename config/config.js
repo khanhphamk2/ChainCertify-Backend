@@ -20,8 +20,8 @@ const envVarsSchema = Joi.object()
         INFURA_API_KEY: Joi.string().required().description('Infura API key'),
         INFURA_SECRET_KEY: Joi.string().required().description('Infura API key secret'),
 
-        L2_CRED_CONTRACT_ADDRESS: Joi.string().required().description('Certificates contract address L2 tesnet'),
-        L2_ISSUER_CONTRACT_ADDRESS: Joi.string().required().description('Issuers contract address L2 tesnet'),
+        L2_CRED_CONTRACT: Joi.string().required().description('Certificates contract address L2 tesnet'),
+        L2_ISSUER_CONTRACT: Joi.string().required().description('Issuers contract address L2 tesnet'),
 
         ACCOUNT_ADDRESS: Joi.string().required().description('Account address'),
         PRIVATE_KEY: Joi.string().required().description('Private key'),
@@ -45,7 +45,7 @@ module.exports = {
     env: envVars.NODE_ENV,
     port: envVars.PORT,
     mongoose: {
-        url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
+        url: envVars.MONGODB_URL,
         // options: {
         //     useNewUrlParser: true,
         //     useUnifiedTopology: true,
@@ -62,8 +62,8 @@ module.exports = {
     L1_RPC: envVars.L1_RPC,
     // Layer 2
     L2_RPC: envVars.L2_RPC,
-    L2_CRED_CON_ADDR: envVars.L2_CRED_CONTRACT_ADDRESS,
-    L2_ISSUER_CON_ADDR: envVars.L2_ISSUER_CONTRACT_ADDRESS,
+    L2_CRED: envVars.L2_CRED_CONTRACT,
+    L2_ISSUER: envVars.L2_ISSUER_CONTRACT,
     // Infura
     INFURA_API_KEY: envVars.INFURA_API_KEY,
     INFURA_SECRET_KEY: envVars.INFURA_SECRET_KEY,

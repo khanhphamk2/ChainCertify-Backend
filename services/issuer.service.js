@@ -1,11 +1,12 @@
 const config = require('../config/config');
 const ethers = require('ethers');
 const abiIssuer = require('../utils/ABI/issuer.json');
+const { RequestIssue, RequestRevoke } = require('../models');
 
-const provider = new ethers.JsonRpcProvider(config.L2_RPC + config.INFURA_API_KEY);
+const provider = new ethers.JsonRpcProvider(config.L2_RPC);
 
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
-const contract = new ethers.Contract(config.L2_ISSUER_CON_ADDR, abiIssuer, wallet);
+const contract = new ethers.Contract(config.L2_ISSUER, abiIssuer, wallet);
 
 /**
  * Add a new issuer
@@ -39,8 +40,31 @@ const revokeIssuer = async (msgSender, issuer) => {
     return tx.hash;
 };
 
+const getListRequestIssue = async (address) => {
+    try {
+        const listRequest = await RequestIssue.find();
+
+        return listRequest;
+    } catch (error) {
+        console.error('Error getting list request issue:', error);
+        throw error;
+    }
+}
+
+const getListRequestRevoke = async (address) => {
+    try {
+        const listRequest = await RequestRevoke.find();
+        return listRequest;
+    } catch (error) {
+        console.error('Error getting list request revoke:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     addIssuer,
     getIssuers,
-    revokeIssuer
+    revokeIssuer,
+    getListRequestIssue,
+    getListRequestRevoke
 };

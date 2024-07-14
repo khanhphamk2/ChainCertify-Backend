@@ -6,12 +6,37 @@ const { ethers } = require('ethers');
 const abiCred = require('../utils/ABI/certificate.json');
 const ipfs = require('../utils/ipfs');
 const fs = require('fs');
+const { Credential } = require('../models');
 
 const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
 
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
 
 const contract = new ethers.Contract(config.CRED_CONTRACT, abiCred, wallet);
+
+const addCredential = async (certHash, holder, expireDate) => {
+    try {
+        const cred = new Credential({ certHash, holder, expireDate });
+        await cred.save();
+        return cred;
+    } catch (error) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error adding credential: ' + error.message);
+    }
+}
+
+const getListCred = async (holder) => {
+    try {
+        const credentials = await Credential.find({ holder: holder });
+        if (!credentials.length) {
+            console.log('No certificates found for this holder');
+            return [];
+        }
+        return credentials.map(cred => cred.certHash);
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+};
 
 const issueCredential = async (reqBody, pdfFile) => {
     try {
@@ -64,15 +89,15 @@ const issueCredential = async (reqBody, pdfFile) => {
             throw new Error('CertificateIssued event not found in transaction logs');
         }
 
-        console.log('Certificate hash:', certHash);
+        const cred = await addCredential(certHash, reqBody.holder, reqBody.expireDate);
 
         // Return the success response
         return {
-            status: 'success',
             message: 'Credential Issued Successfully!',
             certificateHash: certHash,
             ipfs: ipns,
-            result: receipt,
+            credential: cred,
+            transactionHash: receipt.hash,
         };
     } catch (error) {
         // Handle any errors that occur during the process
@@ -81,34 +106,32 @@ const issueCredential = async (reqBody, pdfFile) => {
 };
 
 
-// const getCredentialsByHolderAddress = async (holderAddress) => {
-//     try {
-//         const tx = await contract.getCredentialsByHolderAddress(holderAddress);
 
-//         await tx.wait();
-//         return {
-//             status: 'success',
-//             message: 'Get List Credential Successful!',
-//             result: tx
-//         };
-//     } catch (error) {
-//         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error fetching credentials: ' + error.message);
-//     }
-// };
+const getCredentialsByHolderAddress = async (holder) => {
+    try {
+        const credentials = await getListCred(holder);
+        const tx = await contract.getCertificatesCount(holder, credentials, { from: config.ACCOUNT_ADDRESS });
+        console.log('tx', tx);
+        return {
+            status: 'success',
+            message: 'Get List Credential Successful!',
+            result: Number(tx)
+        };
+    } catch (error) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error fetching credentials: ' + error.message);
+    }
+};
 
 const getCredentialByHash = async (body, hash) => {
     try {
-        console.log('body:', body);
-        console.log('hash:', hash);
-        const certificate = await contract.getCertificateByHash(body.holder, hash, { from: body.msgSender });
+        const certificate = await contract.getCertificateByHash(body.holder, hash, { from: body.issuer });
         const certificateJson = {
             holder: certificate[0],
             issuer: certificate[1],
             ipfsHash: certificate[2],
-            timestamp: new Date(Number(certificate[3]) * 1000), // Convert BigInt to string
+            timestamp: new Date(Number(certificate[3]) * 1000), // Convert BigInt to Date
             isRevoked: certificate[4]
         };
-        console.log('Certificate:', certificate);
         return certificateJson;
     } catch (error) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error fetching credential: ' + error.message);
@@ -146,7 +169,7 @@ const revokeCredential = async (reqBody) => {
 
 module.exports = {
     issueCredential,
-    // getCredentialsByHolderAddress,
+    getCredentialsByHolderAddress,
     getCredentialByHash,
     revokeCredential,
     // verifyCredential

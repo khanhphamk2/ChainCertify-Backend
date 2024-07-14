@@ -1,17 +1,19 @@
 const express = require('express');
-const holderController = require('../controllers/holder.controller');
+const { holderController } = require('../controllers');
 
 const router = express.Router();
 
-router
-    .route('/')
-    .get(holderController.getListCredentials);
+// router
+//     .route('/')
+//     .get(holderController.getListCredentials);
 
+router.route('/request-issue').post(holderController.requestIssueCredential);
+router.route('/request-revoke').post(holderController.requestRevokeCredential);
 
-router
-    .route('/{hash}')
-    .get(holderController.getCredential)
-    .post(holderController.modifyCredential);
+// router
+//     .route('/{hash}')
+//     .get(holderController.getCredential)
+//     .post(holderController.modifyCredential);
 
 module.exports = router;
 
