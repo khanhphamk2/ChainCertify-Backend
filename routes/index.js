@@ -4,7 +4,6 @@ const config = require('../config/config');
 const issuerRoute = require('./issuer.route');
 const holderRoute = require('./holder.route');
 const credentialRoute = require('./credential.route');
-// const ipfsRoute = require('./ipfs.route');
 
 const router = express.Router();
 
@@ -21,14 +20,6 @@ const defaultRoutes = [
         path: '/credential',
         route: credentialRoute,
     },
-    // {
-    //     path: '/ipfs',
-    //     route: ipfsRoute,
-    // },
-    // {
-    //     path: '/auth',
-    //     route: authRoute,
-    // }
 ];
 
 const devRoutes = [

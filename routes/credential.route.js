@@ -19,72 +19,74 @@ module.exports = router;
 // Swagger documentation for the credential route
 
 /**
- * @swagger
- * tags:
- *   name: Certificate
- *   description: Certificate management
- */
-
-/**
- * @swagger
- * /credential/address:
- *   post:
- *     summary: Create a new credential
- *     description: Create a new credential for a holder.
- *     tags: [Certificate]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - address_issuer
- *               - holder_name
- *               - dob
- *               - identity_number
- *               - holder_address
- *               - score
- *               - note
- *             properties:
- *               address_issuer:
- *                 type: string
- *                 description: Address wallet of the issuer
- *               holder_name:
- *                 type: string
- *                 description: Name of the holder
- *               dob:
- *                 type: string
- *                 format: date
- *                 description: Date of birth of the holder
- *               identity_number:
- *                 type: string
- *                 description: Identity number of the holder
- *               holder_address:
- *                 type: string
- *                 description: Address wallet of the holder
- *               score:
- *                 type: number
- *                 description: Score of the holder
- *               note:
- *                 type: string
- *                 description: Note of the holder
- *     responses:
- *       "201":
- *        description: Credential created successfully
- *        content:
- *         application/json:
- *          schema:
- *           type: object
- *           $ref: '#/components/schemas/Certificate'
- *       "400":
- *         $ref: '#/components/responses/BadRequest'
- *       "401":
- *         $ref: '#/components/responses/Unauthorized'
- *       "403":
- *         $ref: '#/components/responses/Forbidden'
- *       "404":
- *         $ref: '#/components/responses/NotFound'
+* @swagger
+* /credential/address:
+*   post:
+*     summary: Create a new credential
+*     description: Create a new credential for a holder.
+*     tags: [Certificate]
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             required:
+*               - jsonData
+*               - pdfFile
+*             properties:
+*               jsonData:
+*                 type: object
+*                 required:
+*                   - address_issuer
+*                   - holder_name
+*                   - dob
+*                   - identity_number
+*                   - holder_address
+*                   - score
+*                   - note
+*                 properties:
+*                   address_issuer:
+*                     type: string
+*                     description: Address wallet of the issuer
+*                   holder_name:
+*                     type: string
+*                     description: Name of the holder
+*                   dob:
+*                     type: string
+*                     format: date
+*                     description: Date of birth of the holder
+*                   identity_number:
+*                     type: string
+*                     description: Identity number of the holder
+*                   holder_address:
+*                     type: string
+*                     description: Address wallet of the holder
+*                   score:
+*                     type: number
+*                     description: Score of the holder
+*                   note:
+*                     type: string
+*                     description: Note of the holder
+*               pdfFile:
+*                 type: string
+*                 format: binary
+*                 description: The PDF file associated with the credential
+*     responses:
+*       "201":
+*         description: Credential created successfully
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/Certificate'
+*       "400":
+*         $ref: '#/components/responses/BadRequest'
+*       "401":
+*         $ref: '#/components/responses/Unauthorized'
+*       "403":
+*         $ref: '#/components/responses/Forbidden'
+*       "404":
+*         $ref: '#/components/responses/NotFound'
  *   get:
  *     summary: Get all credentials for a Holder
  *     description: Retrieve all credentials.

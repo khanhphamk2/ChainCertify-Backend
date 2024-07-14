@@ -11,6 +11,9 @@ const envVarsSchema = Joi.object()
         MONGODB_URL: Joi.string().required().description('Mongo DB url'),
 
         LOCAL_RPC: Joi.string().required().description('LOCAL RPC url'),
+        CRED_CONTRACT: Joi.string().required().description('Certificates contract address Local tesnet'),
+        ISSUER_CONTRACT: Joi.string().required().description('Issuers contract address Local tesnet'),
+
         L1_RPC: Joi.string().required().description('L1 RPC url'),
         L2_RPC: Joi.string().required().description('L2 RPC url'),
 
@@ -52,11 +55,11 @@ module.exports = {
     PRIVATE_KEY: envVars.PRIVATE_KEY,
     // LOCAL
     RPC_LOCAL: envVars.LOCAL_RPC,
+    CRED_CONTRACT: envVars.CRED_CONTRACT,
+    ISSUER_CONTRACT: envVars.ISSUER_CONTRACT,
 
     // Layer 1
     L1_RPC: envVars.L1_RPC,
-    L1_CRED_CON_ADDR: envVars.L1_CRED_CONTRACT_ADDRESS,
-    L1_ISSUER_CON_ADDR: envVars.L1_ISSUER_CONTRACT_ADDRESS,
     // Layer 2
     L2_RPC: envVars.L2_RPC,
     L2_CRED_CON_ADDR: envVars.L2_CRED_CONTRACT_ADDRESS,

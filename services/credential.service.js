@@ -7,17 +7,19 @@ const abiCred = require('../utils/ABI/certificate.json');
 const ipfs = require('../utils/ipfs');
 const fs = require('fs');
 
-const provider = new ethers.JsonRpcProvider(config.L2_RPC + config.INFURA_API_KEY);
+const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
 
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
 
-const contract = new ethers.Contract(config.L2_CRED_CON_ADDR, abiCred, wallet);
+const contract = new ethers.Contract(config.CRED_CONTRACT, abiCred, wallet);
 
 const issueCredential = async (reqBody, pdfFile) => {
     try {
-        const pdfHash = await ipfs.pinFileToIPFS(pdfFile.path, pdfFile.filename);
-        fs.unlinkSync(pdfFile.path);
+        // Pin the PDF file to IPFS and get its hash
+        const { IpfsHash: pdfIpfsHash } = await ipfs.pinFileToIPFS(pdfFile.path, pdfFile.filename);
+        fs.unlinkSync(pdfFile.path); // Remove the PDF file from local storage
 
+        // Create the certificate information object
         const info = {
             name: reqBody.name,
             identity_number: reqBody.identityNumber,
@@ -28,68 +30,56 @@ const issueCredential = async (reqBody, pdfFile) => {
             note: reqBody.note,
         };
 
+        // Create the certificate object
         const cert = {
             holder: reqBody.holder,
-            pdf: pdfHash.IpfsHash,
-            info: info
+            pdf: pdfIpfsHash,
+            info,
         };
 
+        // Hash the certificate information
         const hashInfo = hashObject(info);
 
+        // Create a custom name for the IPFS JSON upload
         const customName = `${reqBody.holder}_${hashInfo.slice(2)}`;
 
-        const ipfsHash = await ipfs.uploadJSONToIPFS(cert, customName);
+        // Upload the certificate object to IPFS as JSON
+        const { IpfsHash: jsonIpfsHash } = await ipfs.uploadJSONToIPFS(cert, customName);
 
-        const ipns = await ipfs.getFile(ipfsHash.IpfsHash);
+        // Get the IPFS file reference (IPNS)
+        const ipns = await ipfs.getFile(jsonIpfsHash);
 
-        const tx = await contract.issueCertificate(reqBody.holder, ipfsHash.IpfsHash, hashInfo, { from: reqBody.msgSender });
+        // Issue the certificate on the blockchain
+        const tx = await contract.issueCertificate(reqBody.holder, jsonIpfsHash, hashInfo, { from: reqBody.msgSender });
 
+        // Wait for the transaction to be confirmed
         const receipt = await tx.wait();
 
-        let certHash = "";
+        // Extract the certificate hash from the transaction logs
+        const certHash = receipt.logs
+            .map(log => contract.interface.parseLog(log))
+            .find(log => log.name === 'CertificateIssued')?.args._certificateHash;
 
-        const logs = receipt.logs.map(log => contract.interface.parseLog(log));
-
-        for (const log of logs) {
-            if (log.name === 'CertificateIssued') {
-                certHash = log.args._certificateHash;
-                console.log('Certificate hash:', log.args._certificateHash);
-            }
+        if (!certHash) {
+            throw new Error('CertificateIssued event not found in transaction logs');
         }
 
+        console.log('Certificate hash:', certHash);
+
+        // Return the success response
         return {
             status: 'success',
             message: 'Credential Issued Successfully!',
             certificateHash: certHash,
             ipfs: ipns,
-            result: receipt
+            result: receipt,
         };
-
     } catch (error) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error creating credential: ' + error.message);
+        // Handle any errors that occur during the process
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error creating credential: ${error.message}`);
     }
 };
 
-const testContract = async (req) => {
-    try {
-        const tx = await contract.issueCertificate(reqBody.holder, ipfsHash.IpfsHash, hashInfo, { from: reqBody.msgSender });
-
-        const receipt = await tx.wait();
-
-        const event = receipt.events.find(event => event.event === 'CertificateIssued');
-        const certificateHash = ethers.EventLog.args.certificateHash;
-
-        return {
-            status: 'success',
-            message: 'Credential Issued Successfully!',
-            certificateHash: receipt.events.CertificateIssued.returnValues._certificateHash,
-            result: receipt
-        };
-
-    } catch (error) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error creating credential: ' + error.message);
-    }
-};
 
 // const getCredentialsByHolderAddress = async (holderAddress) => {
 //     try {
@@ -106,12 +96,20 @@ const testContract = async (req) => {
 //     }
 // };
 
-const getCredentialByHash = async (holder, credentialHash) => {
+const getCredentialByHash = async (body, hash) => {
     try {
-        const certificate = await certificatesContract.methods
-            .getCertificateByHash(holder, credentialHash)
-            .call();
-        return certificate;
+        console.log('body:', body);
+        console.log('hash:', hash);
+        const certificate = await contract.getCertificateByHash(body.holder, hash, { from: body.msgSender });
+        const certificateJson = {
+            holder: certificate[0],
+            issuer: certificate[1],
+            ipfsHash: certificate[2],
+            timestamp: new Date(Number(certificate[3]) * 1000), // Convert BigInt to string
+            isRevoked: certificate[4]
+        };
+        console.log('Certificate:', certificate);
+        return certificateJson;
     } catch (error) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error fetching credential: ' + error.message);
     }
@@ -149,7 +147,7 @@ const revokeCredential = async (reqBody) => {
 module.exports = {
     issueCredential,
     // getCredentialsByHolderAddress,
-    // getCredentialByHash,
+    getCredentialByHash,
     revokeCredential,
     // verifyCredential
 };
