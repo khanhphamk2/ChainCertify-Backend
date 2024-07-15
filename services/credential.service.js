@@ -147,9 +147,9 @@ const getCredentialByHash = async (body, hash) => {
     }
 };
 
-const revokeCredential = async (body) => {
+const revokeCredential = async (body, hash) => {
     try {
-        const tx = await contract.revokeCertificate(body.holder, body.hash, body.reason, {
+        const tx = await contract.revokeCertificate(body.holder, hash, body.reason, {
             from: body.issuer
         })
         const receipt = await tx.wait();

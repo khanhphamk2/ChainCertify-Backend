@@ -25,7 +25,7 @@ const getCredentialByHash = catchAsync(async (req, res) => {
 });
 
 const revokeCredential = catchAsync(async (req, res) => {
-    const result = await credentialService.revokeCredential(req.body);
+    const result = await credentialService.revokeCredential(req.body, req.params.hash.toString());
     res.status(httpStatus.OK).send(result);
 });
 

@@ -3,23 +3,12 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "owner",
+                "name": "_issuerContractAddress",
                 "type": "address"
             }
         ],
-        "name": "OwnableInvalidOwner",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            }
-        ],
-        "name": "OwnableUnauthorizedAccount",
-        "type": "error"
+        "stateMutability": "payable",
+        "type": "constructor"
     },
     {
         "anonymous": false,
@@ -27,35 +16,283 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "previousOwner",
+                "name": "_holder",
                 "type": "address"
             },
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "newOwner",
+                "name": "_issuer",
                 "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "_ipfsHash",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "_hashInfor",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "_issueDate",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "_note",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "_certificateHash",
+                "type": "bytes32"
             }
         ],
-        "name": "OwnershipTransferred",
+        "name": "CertificateIssued",
         "type": "event"
     },
     {
-        "inputs": [],
-        "name": "owner",
-        "outputs": [
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "_issuer",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "_holder",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "_certificateHash",
+                "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "_isRevoked",
+                "type": "bool"
+            }
+        ],
+        "name": "RevokedCertificate",
+        "type": "event"
+    },
+    {
+        "inputs": [
             {
                 "internalType": "address",
-                "name": "",
+                "name": "_holder",
                 "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "_certificateHash",
+                "type": "bytes32"
+            }
+        ],
+        "name": "getCertificateByHash",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "holder",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "issuer",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "ipfsHash",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "issueDate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "note",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isRevoked",
+                        "type": "bool"
+                    }
+                ],
+                "internalType": "struct Certificates.Certificate",
+                "name": "",
+                "type": "tuple"
             }
         ],
         "stateMutability": "view",
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "renounceOwnership",
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes32[]",
+                "name": "certIds",
+                "type": "bytes32[]"
+            }
+        ],
+        "name": "getCertificatesByList",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "holder",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "issuer",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "ipfsHash",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "issueDate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "note",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isRevoked",
+                        "type": "bool"
+                    }
+                ],
+                "internalType": "struct Certificates.Certificate[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_holder",
+                "type": "address"
+            }
+        ],
+        "name": "getCertificatesCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_holder",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "_ipfsHash",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_hashInfor",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_note",
+                "type": "string"
+            }
+        ],
+        "name": "issueCertificate",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_holder",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "_certificateHash",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "string",
+                "name": "_note",
+                "type": "string"
+            }
+        ],
+        "name": "revokeCertificate",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_revocationConsensusContract",
+                "type": "address"
+            }
+        ],
+        "name": "setRevocationConsensusContract",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -64,13 +301,24 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "newOwner",
+                "name": "_holder",
                 "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "_certificateHash",
+                "type": "bytes32"
             }
         ],
-        "name": "transferOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
+        "name": "verifyCertificate",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     }
 ]
