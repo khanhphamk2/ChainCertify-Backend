@@ -106,7 +106,6 @@ const issueCredential = async (reqBody, pdfFile) => {
     }
 };
 
-
 const getCredentialsByHolderAddress = async (holder) => {
     try {
         const credentials = await getListCred(holder);
@@ -116,10 +115,11 @@ const getCredentialsByHolderAddress = async (holder) => {
         const res = listCerts.map(certificate => ({
             holder: certificate[0],
             issuer: certificate[1],
-            ipfsHash: certificate[2],
-            issueDate: new Date(Number(certificate[3]) * 1000), // Convert BigInt to Date
-            note: certificate[4],
-            isRevoked: certificate[5]
+            certHash: certificate[2],
+            ipfsHash: certificate[3],
+            issueDate: new Date(Number(certificate[4]) * 1000), // Convert BigInt to Date
+            note: certificate[5],
+            isRevoked: certificate[6]
         }));
 
         return {
@@ -139,7 +139,8 @@ const getCredentialByHash = async (body, hash) => {
             issuer: certificate[1],
             ipfsHash: certificate[2],
             issueDate: new Date(Number(certificate[3]) * 1000), // Convert BigInt to Date
-            isRevoked: certificate[4]
+            note: certificate[4],
+            isRevoked: certificate[5]
         };
         return certificateJson;
     } catch (error) {
@@ -159,8 +160,8 @@ const revokeCredential = async (body, hash) => {
         for (const log of logs) {
             if (log.name === 'RevokedCertificate') {
                 _isRevoked = log.args._isRevoked;
-                console.log('Certificate hash:', log.args._certificateHash);
-                console.log('args', log.args._isRevoked);
+                // console.log('Certificate hash:', log.args._certificateHash);
+                // console.log('args', log.args._isRevoked);
             }
         }
 

@@ -118,6 +118,11 @@
                         "type": "address"
                     },
                     {
+                        "internalType": "bytes32",
+                        "name": "certHash",
+                        "type": "bytes32"
+                    },
+                    {
                         "internalType": "string",
                         "name": "ipfsHash",
                         "type": "string"
@@ -172,6 +177,11 @@
                         "internalType": "address",
                         "name": "issuer",
                         "type": "address"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "certHash",
+                        "type": "bytes32"
                     },
                     {
                         "internalType": "string",
