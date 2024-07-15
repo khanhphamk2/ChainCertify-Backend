@@ -8,7 +8,7 @@ const requestIssueCredential = catchAsync(async (req, res) => {
 });
 
 const requestRevokeCredential = catchAsync(async (req, res) => {
-    const request = holderService.requestRevokeCredential(req.body);
+    holderService.requestRevokeCredential(req.body);
     res.status(httpStatus.CREATED).send('Request saved successfully');
 });
 

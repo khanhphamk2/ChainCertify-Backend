@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { requestStatus } = require('../config/request.enum');
 
 const requestRevokeSchema = new mongoose.Schema({
     address: {
@@ -17,13 +18,18 @@ const requestRevokeSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    updateAt: {
+        type: Date,
+        required: false
+    },
     note: {
         type: String,
         required: false
     },
-    done: {
-        type: Boolean,
-        default: false
+    status: {
+        type: String,
+        required: true,
+        enum: requestStatus
     }
 });
 

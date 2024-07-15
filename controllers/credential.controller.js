@@ -9,7 +9,7 @@ const issueCredential = catchAsync(async (req, res) => {
 });
 
 const getCredentialsByHolderAddress = catchAsync(async (req, res) => {
-    const result = await credentialService.getCredentialsByHolderAddress(req.params.holder);
+    const result = await credentialService.getCredentialsByHolderAddress(req.params.address.toString());
     if (!result) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Credential not found');
     }

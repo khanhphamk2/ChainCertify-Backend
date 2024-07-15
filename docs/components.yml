@@ -101,7 +101,16 @@ components:
           example:
             code: 404
             message: Not found
-
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 500
+            message: Internal Server Error
+            
   # securitySchemes:
   #   bearerAuth:
   #     type: http

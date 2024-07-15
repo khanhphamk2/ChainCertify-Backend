@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
+const { requestStatus } = require('../config/request.enum');
 
 const requestIssue = new mongoose.Schema({
     address: {
         type: String,
         required: true
     },
-    credentialDetails: {
-        type: Object,
+    jsonData: {
+        type: String,
         required: true
     },
     pdfFile: {
@@ -17,10 +18,14 @@ const requestIssue = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    Done: {
-        type: Boolean,
-        required: false,
-        default: false
+    updateAt: {
+        type: Date,
+        required: false
+    },
+    status: {
+        type: String,
+        required: true,
+        enum: requestStatus
     }
 });
 

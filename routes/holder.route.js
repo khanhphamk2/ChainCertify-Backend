@@ -7,8 +7,8 @@ const router = express.Router();
 //     .route('/')
 //     .get(holderController.getListCredentials);
 
-router.route('/request-issue').post(holderController.requestIssueCredential);
-router.route('/request-revoke').post(holderController.requestRevokeCredential);
+router.route('/requestIssue').post(holderController.requestIssueCredential);
+router.route('/requestRevoke').post(holderController.requestRevokeCredential);
 
 // router
 //     .route('/{hash}')

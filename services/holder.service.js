@@ -1,14 +1,16 @@
 const catchAsync = require('../utils/catchAsync');
 const { RequestIssue, RequestRevoke } = require('../models');
+const { requestStatus } = require('../config/request.enum');
 
 const requestIssueCredential = catchAsync(async (body) => {
     try {
         const { address, pdfFile, ...credentialDetails } = body;
 
         const request = new RequestIssue({
-            address,
-            pdfFile,
-            credentialDetails
+            address: address,
+            pdfFile: pdfFile,
+            jsonData: credentialDetails,
+            status: requestStatus.PENDING
         });
         await request.save();
 

@@ -47,12 +47,11 @@ const issueCredential = async (reqBody, pdfFile) => {
         // Create the certificate information object
         const info = {
             name: reqBody.name,
-            identity_number: reqBody.identityNumber,
+            identityNumber: reqBody.identityNumber,
             institution: reqBody.institution,
             type: reqBody.type,
             score: reqBody.score,
             expireDate: reqBody.expireDate,
-            note: reqBody.note,
         };
 
         // Create the certificate object
@@ -75,7 +74,7 @@ const issueCredential = async (reqBody, pdfFile) => {
         const ipns = await ipfs.getFile(jsonIpfsHash);
 
         // Issue the certificate on the blockchain
-        const tx = await contract.issueCertificate(reqBody.holder, jsonIpfsHash, hashInfo, { from: reqBody.msgSender });
+        const tx = await contract.issueCertificate(reqBody.holder, jsonIpfsHash, hashInfo, reqBody.note, { from: reqBody.msgSender });
 
         // Wait for the transaction to be confirmed
         const receipt = await tx.wait();
@@ -106,42 +105,50 @@ const issueCredential = async (reqBody, pdfFile) => {
 };
 
 
-
 const getCredentialsByHolderAddress = async (holder) => {
     try {
         const credentials = await getListCred(holder);
-        const tx = await contract.getCertificatesCount(holder, credentials, { from: config.ACCOUNT_ADDRESS });
-        console.log('tx', tx);
+
+        const listCerts = await contract.getCertificatesByList(holder, credentials, { from: config.ACCOUNT_ADDRESS });
+
+        const res = listCerts.map(certificate => ({
+            holder: certificate[0],
+            issuer: certificate[1],
+            ipfsHash: certificate[2],
+            issueDate: new Date(Number(certificate[3]) * 1000), // Convert BigInt to Date
+            note: certificate[4],
+            isRevoked: certificate[5]
+        }));
+
         return {
-            status: 'success',
             message: 'Get List Credential Successful!',
-            result: Number(tx)
+            result: res
         };
     } catch (error) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error fetching credentials: ' + error.message);
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error: ' + error.message);
     }
 };
 
 const getCredentialByHash = async (body, hash) => {
     try {
-        const certificate = await contract.getCertificateByHash(body.holder, hash, { from: body.issuer });
+        const certificate = await contract.getCertificateByHash(body.holder, hash, { from: body.msgSender });
         const certificateJson = {
             holder: certificate[0],
             issuer: certificate[1],
             ipfsHash: certificate[2],
-            timestamp: new Date(Number(certificate[3]) * 1000), // Convert BigInt to Date
+            issueDate: new Date(Number(certificate[3]) * 1000), // Convert BigInt to Date
             isRevoked: certificate[4]
         };
         return certificateJson;
     } catch (error) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error fetching credential: ' + error.message);
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error: ' + error.message);
     }
 };
 
-const revokeCredential = async (reqBody) => {
+const revokeCredential = async (body) => {
     try {
-        const tx = await contract.revokeCertificate(reqBody.holder, reqBody.hash, {
-            from: reqBody.msgSender
+        const tx = await contract.revokeCertificate(body.holder, body.hash, body.reason, {
+            from: body.issuer
         })
         const receipt = await tx.wait();
 
@@ -156,8 +163,8 @@ const revokeCredential = async (reqBody) => {
         }
 
         return {
-            status: 'success',
             message: 'Credential Revoked Successfully!',
+            reason: body.reason,
             isRevoked: _isRevoked,
             result: receipt
         };
