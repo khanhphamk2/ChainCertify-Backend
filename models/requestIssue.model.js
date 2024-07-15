@@ -6,13 +6,23 @@ const requestIssue = new mongoose.Schema({
         type: String,
         required: true
     },
-    jsonData: {
+    pdfIpfsHash: {
         type: String,
         required: true
     },
-    pdfFile: {
+    data: {
+        type: Object,
+        required: true
+    },
+    note: {
         type: String,
-        required: false
+        required: false,
+        default: ''
+    },
+    status: {
+        type: String,
+        required: true,
+        enum: requestStatus
     },
     createdAt: {
         type: Date,
@@ -20,13 +30,9 @@ const requestIssue = new mongoose.Schema({
     },
     updateAt: {
         type: Date,
-        required: false
+        required: false,
+        default: null
     },
-    status: {
-        type: String,
-        required: true,
-        enum: requestStatus
-    }
 });
 
 module.exports = mongoose.model('RequestIssue', requestIssue);

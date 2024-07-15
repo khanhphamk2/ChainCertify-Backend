@@ -1,19 +1,12 @@
 const express = require('express');
+const upload = require('../middlewares/upload');
 const { holderController } = require('../controllers');
 
 const router = express.Router();
 
-// router
-//     .route('/')
-//     .get(holderController.getListCredentials);
-
-router.route('/requestIssue').post(holderController.requestIssueCredential);
+router.route('/requestIssue').post(upload.single('pdfFile'), holderController.requestIssueCredential);
 router.route('/requestRevoke').post(holderController.requestRevokeCredential);
 
-// router
-//     .route('/{hash}')
-//     .get(holderController.getCredential)
-//     .post(holderController.modifyCredential);
 
 module.exports = router;
 

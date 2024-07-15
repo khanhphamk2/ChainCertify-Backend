@@ -72,6 +72,18 @@ const getListRequestRevoke = async (address) => {
     }
 }
 
+const approveRequestIssue = async (address) => {
+    try {
+        const request = await RequestIssue.findOne({ address });
+        if (!request) {
+            throw new Error('Request not found');
+        }
+    } catch (error) {
+        console.error('Error approving request issue:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     addIssuer,
     getIssuers,

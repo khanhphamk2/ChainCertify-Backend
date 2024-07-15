@@ -137,10 +137,11 @@ const getCredentialByHash = async (body, hash) => {
         const certificateJson = {
             holder: certificate[0],
             issuer: certificate[1],
-            ipfsHash: certificate[2],
-            issueDate: new Date(Number(certificate[3]) * 1000), // Convert BigInt to Date
-            note: certificate[4],
-            isRevoked: certificate[5]
+            certHash: certificate[2],
+            ipfsHash: certificate[3],
+            issueDate: new Date(Number(certificate[4]) * 1000), // Convert BigInt to Date
+            note: certificate[5],
+            isRevoked: certificate[6]
         };
         return certificateJson;
     } catch (error) {

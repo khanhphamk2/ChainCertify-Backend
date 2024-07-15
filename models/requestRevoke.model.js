@@ -10,7 +10,7 @@ const requestRevokeSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    revokeReason: {
+    reason: {
         type: String,
         required: true
     },
@@ -20,11 +20,13 @@ const requestRevokeSchema = new mongoose.Schema({
     },
     updateAt: {
         type: Date,
-        required: false
+        required: false,
+        default: null
     },
     note: {
         type: String,
-        required: false
+        required: false,
+        default: ''
     },
     status: {
         type: String,

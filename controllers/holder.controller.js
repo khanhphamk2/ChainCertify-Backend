@@ -3,13 +3,14 @@ const catchAsync = require('../utils/catchAsync');
 const httpStatus = require('http-status');
 
 const requestIssueCredential = catchAsync(async (req, res) => {
-    holderService.requestIssueCredential(req.body);
-    res.status(httpStatus.CREATED).send('Request saved successfully');
+    const data = JSON.parse(req.body.jsonData);
+    const request = holderService.requestIssueCredential(data, req.file);
+    res.status(httpStatus.CREATED).send({ message: 'Request saved successfully', request: request });
 });
 
 const requestRevokeCredential = catchAsync(async (req, res) => {
-    holderService.requestRevokeCredential(req.body);
-    res.status(httpStatus.CREATED).send('Request saved successfully');
+    const result = holderService.requestRevokeCredential(req.body);
+    res.status(httpStatus.CREATED).send({ message: 'Request saved successfully', request: result });
 });
 
 module.exports = {
