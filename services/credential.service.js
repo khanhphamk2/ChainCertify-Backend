@@ -54,6 +54,8 @@ const issueCredential = async (reqBody, pdfFile) => {
             expireDate: reqBody.expireDate,
         };
 
+        console.log('info', reqBody.note);
+
         // Create the certificate object
         const cert = {
             holder: reqBody.holder,

@@ -27,6 +27,11 @@ const addIssuer = async (msgSender, issuer) => {
     }
 };
 
+/**
+ * 
+ * @param {string} msgSender 
+ * @returns {Promise<Object>}
+ */
 const getIssuers = async (msgSender) => {
     const tx = await contract.getIssuers({ from: msgSender });
     const issuers = await tx.wait();
@@ -34,6 +39,12 @@ const getIssuers = async (msgSender) => {
     return issuers;
 };
 
+/**
+ * 
+ * @param {string} msgSender 
+ * @param {string} issuer 
+ * @returns {Promise<string>}
+ */
 const revokeIssuer = async (msgSender, issuer) => {
     const tx = await contract.revokeIssuer(issuer, { from: msgSender });
     await tx.wait();

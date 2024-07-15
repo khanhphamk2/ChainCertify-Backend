@@ -143,6 +143,11 @@
                 "internalType": "bytes32",
                 "name": "_certificateHash",
                 "type": "bytes32"
+            },
+            {
+                "internalType": "string",
+                "name": "_note",
+                "type": "string"
             }
         ],
         "name": "approveRevocation",
