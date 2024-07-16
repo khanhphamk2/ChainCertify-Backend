@@ -4,8 +4,8 @@ const { holderController } = require('../controllers');
 
 const router = express.Router();
 
-router.route('/requestIssue').post(upload.single('pdfFile'), holderController.requestIssueCredential);
-router.route('/requestRevoke').post(holderController.requestRevokeCredential);
+// router.route('/requestIssue').post(upload.single('pdfFile'), holderController.requestIssueCredential);
+// router.route('/requestRevoke').post(holderController.requestRevokeCredential);
 
 
 module.exports = router;

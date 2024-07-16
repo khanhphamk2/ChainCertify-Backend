@@ -24,20 +24,8 @@ const getIssuers = catchAsync(async (req, res) => {
 //     });
 // });
 
-const getListRequestIssue = catchAsync(async (req, res) => {
-    const request = issuerService.getListRequestIssue(req.params.address);
-    res.status(httpStatus.OK).send(request);
-});
-
-const getListRequestRevoke = catchAsync(async (req, res) => {
-    const request = issuerService.getListRequestRevoke(req.params.address);
-    res.status(httpStatus.OK).send(request);
-});
-
 module.exports = {
     addIssuer,
     getIssuers,
-    // revokeIssuer,
-    getListRequestIssue,
-    getListRequestRevoke
+    // revokeIssuer
 };

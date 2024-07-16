@@ -7,18 +7,9 @@ router
     .route('/')
     .post(issuerController.addIssuer)
     .get(issuerController.getIssuers);
-// router.route('/').put(issuerController.revokeIssuer);
-// router.route('/').delete(issuerController.deleteIssuer);
 
-// router.route('/requestIssue/').get(issuerController.getListRequestIssue);
-// router
-//     .route('/requestIssue/:address')
-//     .get(issuerController.getRequestIssue)
-//     .put(issuerController.approveRequestIssue)
-//     .delete(issuerController.rejectRequestIssue);
+// router.route('/:address').put(issuerController.revokeIssuer);
 
-// router.route('/requestRevoke/:address').get(issuerController.getListRequestRevoke);
-// router.route('/requestRevoke/').get(issuerController.getListRequestRevoke);
 
 module.exports = router;
 

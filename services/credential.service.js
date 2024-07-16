@@ -38,6 +38,59 @@ const getListCred = async (holder) => {
     }
 };
 
+const issueCredentialFromRequest = async (holder, issuer, data, pdfsHash, note) => {
+    try {
+
+        const info = {
+            name: data.name,
+            identityNumber: data.identityNumber,
+            institution: data.institution,
+            type: data.type,
+            score: data.score,
+            expireDate: data.expireDate,
+        };
+
+        const cert = {
+            holder: holder,
+            pdf: pdfsHash,
+            info,
+        };
+
+        const hashInfo = hashObject(info);
+
+        const customName = `${holder}_${hashInfo.slice(2)}`;
+
+        const { IpfsHash: jsonIpfsHash } = await ipfs.uploadJSONToIPFS(cert, customName);
+
+        const ipns = await ipfs.getFile(jsonIpfsHash);
+
+        const tx = await contract.issueCertificate(holder, jsonIpfsHash, hashInfo, note, { from: issuer });
+
+        const receipt = await tx.wait();
+
+        const certHash = receipt.logs
+            .map(log => contract.interface.parseLog(log))
+            .find(log => log.name === 'CertificateIssued')?.args._certificateHash;
+
+        if (!certHash) {
+            throw new Error('CertificateIssued event not found in transaction logs');
+        }
+
+        const cred = await addCredential(certHash, holder, data.expireDate);
+
+        return {
+            message: 'Credential Issued Successfully!',
+            certificateHash: certHash,
+            ipfs: ipns,
+            credential: cred,
+            transactionHash: receipt.hash,
+        };
+
+    } catch (error) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error creating credential: ${error.message}`);
+    }
+}
+
 const issueCredential = async (reqBody, pdfFile) => {
     try {
         // Pin the PDF file to IPFS and get its hash
@@ -180,8 +233,11 @@ const revokeCredential = async (body, hash) => {
 
 module.exports = {
     issueCredential,
+    issueCredentialFromRequest,
     getCredentialsByHolderAddress,
     getCredentialByHash,
     revokeCredential,
+    addCredential,
+    getListCred,
     // verifyCredential
 };

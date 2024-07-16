@@ -28,7 +28,7 @@ const auth =
     (...requiredRoles) =>
         async (req, res, next) => {
             return new Promise((resolve, reject) => {
-                passport.authenticate('jwt', { session: false }, verifyCallback(req, resolve, reject, requiredRoles))(req, res, next);
+                passport.authenticate(verifyCallback(req, resolve, reject, requiredRoles))(req, res, next);
             })
                 .then(() => next())
                 .catch((err) => next(err));

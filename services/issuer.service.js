@@ -1,7 +1,8 @@
 const config = require('../config/config');
 const ethers = require('ethers');
 const abiIssuer = require('../utils/ABI/issuer.json');
-const { RequestIssue, RequestRevoke } = require('../models');
+// const { User } = require('../models');
+// const { roles } = require('../config/role.enum');
 
 const provider = new ethers.JsonRpcProvider(config.L2_RPC);
 
@@ -20,6 +21,11 @@ const addIssuer = async (msgSender, issuer) => {
         const tx = await contract.addIssuer(issuer, { from: msgSender });
         const receipt = await tx.wait();
         console.log("Add issuer transaction receipt:", receipt);
+
+        // const user = new User({ address: issuer, role: roles.ISSUER });
+        // await user.save();
+
+        console.log("Issuer saved to database:", user);
         return receipt;
     } catch (error) {
         console.error("Error adding issuer:", error);
@@ -51,43 +57,9 @@ const revokeIssuer = async (msgSender, issuer) => {
     return tx.hash;
 };
 
-const getListRequestIssue = async (address) => {
-    try {
-        const listRequest = await RequestIssue.find();
-
-        return listRequest;
-    } catch (error) {
-        console.error('Error getting list request issue:', error);
-        throw error;
-    }
-}
-
-const getListRequestRevoke = async (address) => {
-    try {
-        const listRequest = await RequestRevoke.find();
-        return listRequest;
-    } catch (error) {
-        console.error('Error getting list request revoke:', error);
-        throw error;
-    }
-}
-
-const approveRequestIssue = async (address) => {
-    try {
-        const request = await RequestIssue.findOne({ address });
-        if (!request) {
-            throw new Error('Request not found');
-        }
-    } catch (error) {
-        console.error('Error approving request issue:', error);
-        throw error;
-    }
-}
 
 module.exports = {
     addIssuer,
     getIssuers,
     revokeIssuer,
-    getListRequestIssue,
-    getListRequestRevoke
 };
