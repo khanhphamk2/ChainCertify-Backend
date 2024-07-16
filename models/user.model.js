@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const roles = require('../config/role.enum');
+const { userRole } = require('../config/role.enum');
 
 const userSchema = new mongoose.Schema({
     address: {
@@ -9,11 +9,12 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         required: true,
-        // enum: roles,
+        enum: userRole,
     },
     isActive: {
         type: Boolean,
         required: true,
+        default: true,
     }
 }, {
     timestamps: true,

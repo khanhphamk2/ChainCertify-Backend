@@ -1,13 +1,13 @@
 const config = require('../config/config');
 const ethers = require('ethers');
 const abiIssuer = require('../utils/ABI/issuer.json');
-// const { User } = require('../models');
-// const { roles } = require('../config/role.enum');
+const { User } = require('../models');
+const { userRole } = require('../config/role.enum');
 
-const provider = new ethers.JsonRpcProvider(config.L2_RPC);
+const provider = new ethers.JsonRpcProvider(config.LOCAL_RPC);
 
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
-const contract = new ethers.Contract(config.L2_ISSUER, abiIssuer, wallet);
+const contract = new ethers.Contract(config.ISSUER_CONTRACT, abiIssuer, wallet);
 
 /**
  * Add a new issuer
@@ -15,17 +15,14 @@ const contract = new ethers.Contract(config.L2_ISSUER, abiIssuer, wallet);
  * @param {string} issuer 
  * @returns {Promise<Object>}
  */
-
 const addIssuer = async (msgSender, issuer) => {
     try {
         const tx = await contract.addIssuer(issuer, { from: msgSender });
         const receipt = await tx.wait();
-        console.log("Add issuer transaction receipt:", receipt);
 
-        // const user = new User({ address: issuer, role: roles.ISSUER });
-        // await user.save();
+        const user = new User({ address: issuer, role: userRole.ISSUER });
+        await user.save();
 
-        console.log("Issuer saved to database:", user);
         return receipt;
     } catch (error) {
         console.error("Error adding issuer:", error);
