@@ -275,5 +275,7 @@ module.exports = {
     revokeCredential,
     addCredential,
     getListCred,
+    uploadPdf,
+    uploadJson,
     // verifyCredential
 };
