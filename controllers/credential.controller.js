@@ -3,13 +3,13 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 
 const uploadPdf = catchAsync(async (req, res) => {
-    const pdf = await credentialService.uploadPdf(req.pdfFile);
-    res.status(httpStatus.CREATED).json({ pdf });
+    const result = await credentialService.uploadPdf(req.file);
+    res.status(httpStatus.CREATED).json({ pdfHash: result });
 });
 
 const uploadJson = catchAsync(async (req, res) => {
-    const json = await credentialService.uploadJson(req.jsonFile);
-    res.status(httpStatus.CREATED).json({ json });
+    const result = await credentialService.uploadJson(req.body);
+    res.status(httpStatus.CREATED).json({ jsonHash: result });
 });
 
 const issueCredential = catchAsync(async (req, res) => {
