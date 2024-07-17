@@ -10,10 +10,6 @@ const { Credential } = require('../models');
 
 const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
 
-const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
-
-const contract = new ethers.Contract(config.CRED_CONTRACT, abiCred, wallet);
-
 const addCredential = async (certHash, holder, expireDate) => {
     try {
         const cred = new Credential({ certHash, holder, expireDate });
@@ -91,48 +87,85 @@ const issueCredentialFromRequest = async (holder, issuer, data, pdfsHash, note) 
     }
 }
 
-const issueCredential = async (reqBody, pdfFile) => {
+// const issueCredential = async (reqBody, pdfFile) => {
+//     try {
+//         // Pin the PDF file to IPFS and get its hash
+//         const { IpfsHash: pdfIpfsHash } = await ipfs.pinFileToIPFS(pdfFile.path, pdfFile.filename);
+//         fs.unlinkSync(pdfFile.path); // Remove the PDF file from local storage
+
+//         // Create the certificate information object
+//         const info = {
+//             name: reqBody.name,
+//             identityNumber: reqBody.identityNumber,
+//             institution: reqBody.institution,
+//             type: reqBody.type,
+//             score: reqBody.score,
+//             expireDate: reqBody.expireDate,
+//         };
+
+//         console.log('info', reqBody.note);
+
+//         // Create the certificate object
+//         const cert = {
+//             holder: reqBody.holder,
+//             pdf: pdfIpfsHash,
+//             info,
+//         };
+
+//         // Hash the certificate information
+//         const hashInfo = hashObject(info);
+
+//         // Create a custom name for the IPFS JSON upload
+//         const customName = `${reqBody.holder}_${hashInfo.slice(2)}`;
+
+//         // Upload the certificate object to IPFS as JSON
+//         const { IpfsHash: jsonIpfsHash } = await ipfs.uploadJSONToIPFS(cert, customName);
+
+//         // Get the IPFS file reference (IPNS)
+//         const ipns = await ipfs.getFile(jsonIpfsHash);
+
+//         // Issue the certificate on the blockchain
+//         const tx = await contract.issueCertificate(reqBody.holder, jsonIpfsHash, hashInfo, reqBody.note, { from: reqBody.msgSender });
+
+//         // Wait for the transaction to be confirmed
+//         const receipt = await tx.wait();
+
+//         // Extract the certificate hash from the transaction logs
+//         const certHash = receipt.logs
+//             .map(log => contract.interface.parseLog(log))
+//             .find(log => log.name === 'CertificateIssued')?.args._certificateHash;
+
+//         if (!certHash) {
+//             throw new Error('CertificateIssued event not found in transaction logs');
+//         }
+
+//         const cred = await addCredential(certHash, reqBody.holder, reqBody.expireDate);
+
+//         // Return the success response
+//         return {
+//             message: 'Credential Issued Successfully!',
+//             certificateHash: certHash,
+//             ipfs: ipns,
+//             credential: cred,
+//             transactionHash: receipt.hash,
+//         };
+//     } catch (error) {
+//         // Handle any errors that occur during the process
+//         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error creating credential: ${error.message}`);
+//     }
+// };
+
+const issueCredential = async (body) => {
     try {
-        // Pin the PDF file to IPFS and get its hash
-        const { IpfsHash: pdfIpfsHash } = await ipfs.pinFileToIPFS(pdfFile.path, pdfFile.filename);
-        fs.unlinkSync(pdfFile.path); // Remove the PDF file from local storage
+        const { signedTx, reqBody, pdfIpfsHash, jsonIpfsHash, hashInfo } = body;
 
-        // Create the certificate information object
-        const info = {
-            name: reqBody.name,
-            identityNumber: reqBody.identityNumber,
-            institution: reqBody.institution,
-            type: reqBody.type,
-            score: reqBody.score,
-            expireDate: reqBody.expireDate,
-        };
-
-        console.log('info', reqBody.note);
-
-        // Create the certificate object
-        const cert = {
-            holder: reqBody.holder,
-            pdf: pdfIpfsHash,
-            info,
-        };
-
-        // Hash the certificate information
-        const hashInfo = hashObject(info);
-
-        // Create a custom name for the IPFS JSON upload
-        const customName = `${reqBody.holder}_${hashInfo.slice(2)}`;
-
-        // Upload the certificate object to IPFS as JSON
-        const { IpfsHash: jsonIpfsHash } = await ipfs.uploadJSONToIPFS(cert, customName);
-
-        // Get the IPFS file reference (IPNS)
-        const ipns = await ipfs.getFile(jsonIpfsHash);
-
+        console.log('hashInfo', hashInfo);
         // Issue the certificate on the blockchain
-        const tx = await contract.issueCertificate(reqBody.holder, jsonIpfsHash, hashInfo, reqBody.note, { from: reqBody.msgSender });
+        const tx = await provider.sendTransaction(signedTx);
 
         // Wait for the transaction to be confirmed
         const receipt = await tx.wait();
+        console.log('receipt', receipt);
 
         // Extract the certificate hash from the transaction logs
         const certHash = receipt.logs
@@ -149,7 +182,8 @@ const issueCredential = async (reqBody, pdfFile) => {
         return {
             message: 'Credential Issued Successfully!',
             certificateHash: certHash,
-            ipfs: ipns,
+            ipfs: jsonIpfsHash,
+            pdfsHash: pdfIpfsHash,
             credential: cred,
             transactionHash: receipt.hash,
         };

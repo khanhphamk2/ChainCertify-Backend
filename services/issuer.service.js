@@ -15,12 +15,18 @@ const contract = new ethers.Contract(config.ISSUER_CONTRACT, abiIssuer, wallet);
  * @param {string} issuer 
  * @returns {Promise<Object>}
  */
-const addIssuer = async (msgSender, issuer) => {
+const addIssuer = async (body) => {
     try {
-        const tx = await contract.addIssuer(issuer, { from: msgSender });
+        const recoveredAddress = ethers.utils.verifyMessage(body.data, body.signature);
+
+        if (recoveredAddress.toLowerCase() !== body.msgSender.toLowerCase()) {
+            return res.status(400).json({ error: 'Invalid signature' });
+        }
+
+        const tx = await contract.addIssuer(body.issuer, { from: body.msgSender });
         const receipt = await tx.wait();
 
-        const user = new User({ address: issuer, role: userRole.ISSUER });
+        const user = new User({ address: body.issuer, role: userRole.ISSUER });
         await user.save();
 
         return receipt;
