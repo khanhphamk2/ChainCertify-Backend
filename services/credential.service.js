@@ -87,6 +87,27 @@ const issueCredentialFromRequest = async (holder, issuer, data, pdfsHash, note) 
     }
 }
 
+const uploadPdf = async (pdfFile) => {
+    try {
+        const { IpfsHash: pdfIpfsHash } = await ipfs.pinFileToIPFS(pdfFile.path, pdfFile.filename);
+        fs.unlinkSync(pdfFile.path);
+        return pdfIpfsHash;
+    } catch (error) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error uploading pdf: ${error.message}`);
+    }
+}
+
+const uploadJson = async (body) => {
+    try {
+        const { cert, holder, hashInfo } = body;
+        const customName = `${holder}_${hashInfo.slice(2)}`;
+        const { IpfsHash: jsonIpfsHash } = await ipfs.uploadJSONToIPFS(cert, customName);
+        return jsonIpfsHash;
+    } catch (error) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error uploading json: ${error.message}`);
+    }
+}
+
 // const issueCredential = async (reqBody, pdfFile) => {
 //     try {
 //         // Pin the PDF file to IPFS and get its hash
@@ -157,35 +178,16 @@ const issueCredentialFromRequest = async (holder, issuer, data, pdfsHash, note) 
 
 const issueCredential = async (body) => {
     try {
-        const { signedTx, reqBody, pdfIpfsHash, jsonIpfsHash, hashInfo } = body;
-
-        console.log('hashInfo', hashInfo);
-        // Issue the certificate on the blockchain
-        const tx = await provider.sendTransaction(signedTx);
-
-        // Wait for the transaction to be confirmed
-        const receipt = await tx.wait();
-        console.log('receipt', receipt);
-
-        // Extract the certificate hash from the transaction logs
-        const certHash = receipt.logs
-            .map(log => contract.interface.parseLog(log))
-            .find(log => log.name === 'CertificateIssued')?.args._certificateHash;
-
-        if (!certHash) {
-            throw new Error('CertificateIssued event not found in transaction logs');
-        }
-
-        const cred = await addCredential(certHash, reqBody.holder, reqBody.expireDate);
-
+        const cred = await addCredential(body.certHash, body.holder, body.expireDate);
+        await cred.save();
         // Return the success response
         return {
             message: 'Credential Issued Successfully!',
-            certificateHash: certHash,
-            ipfs: jsonIpfsHash,
-            pdfsHash: pdfIpfsHash,
-            credential: cred,
-            transactionHash: receipt.hash,
+            certificateHash: body.certHash,
+            ipfs: body.jsonIpfsHash,
+            pdfsHash: body.pdfIpfsHash,
+            credential: body.cred,
+            transactionHash: body.hash,
         };
     } catch (error) {
         // Handle any errors that occur during the process

@@ -8,6 +8,8 @@ router.route('/address').post(credentialController.issueCredential);
 
 router.route('/:address').get(credentialController.getCredentialsByHolderAddress);
 
+router.route('/uploadPdf').post(upload.single('pdfFile'), credentialController.uploadPdf);
+router.route('/uploadJson').post(credentialController.uploadJson);
 
 router
     .route('/address/:hash')

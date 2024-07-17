@@ -2,6 +2,16 @@ const { credentialService } = require('../services');
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 
+const uploadPdf = catchAsync(async (req, res) => {
+    const pdf = await credentialService.uploadPdf(req.pdfFile);
+    res.status(httpStatus.CREATED).json({ pdf });
+});
+
+const uploadJson = catchAsync(async (req, res) => {
+    const json = await credentialService.uploadJson(req.jsonFile);
+    res.status(httpStatus.CREATED).json({ json });
+});
+
 const issueCredential = catchAsync(async (req, res) => {
     const cert = await credentialService.issueCredential(req.body);
     res.status(httpStatus.CREATED).json({ certificate: cert });
@@ -34,4 +44,6 @@ module.exports = {
     getCredentialByHash,
     getCredentialsByHolderAddress,
     revokeCredential,
+    uploadPdf,
+    uploadJson
 };
