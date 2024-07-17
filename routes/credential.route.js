@@ -4,14 +4,16 @@ const upload = require('../middlewares/upload');
 
 const router = express.Router();
 
-router.route('/address').post(upload.single('pdfFile'), credentialController.issueCredential)
+router.route('/address').post(credentialController.issueCredential);
 
 router.route('/:address').get(credentialController.getCredentialsByHolderAddress);
 
+router.route('/uploadPdf').post(upload.single('pdfFile'), credentialController.uploadPdf);
+router.route('/uploadJson').post(credentialController.uploadJson);
 
 router
     .route('/address/:hash')
-    .put(credentialController.revokeCredential)
+    // .put(credentialController.revokeCredential)
     .get(credentialController.getCredentialByHash);
 
 // router.route('/address/verify').post(credentialController.verifyCredential);

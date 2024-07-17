@@ -8,11 +8,7 @@ const ipfs = require('../utils/ipfs');
 const fs = require('fs');
 const { Credential } = require('../models');
 
-const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
-
-const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
-
-const contract = new ethers.Contract(config.CRED_CONTRACT, abiCred, wallet);
+const provider = new ethers.JsonRpcProvider(config.L2_RPC);
 
 const addCredential = async (certHash, holder, expireDate) => {
     try {
@@ -91,67 +87,39 @@ const issueCredentialFromRequest = async (holder, issuer, data, pdfsHash, note) 
     }
 }
 
-const issueCredential = async (reqBody, pdfFile) => {
+const uploadPdf = async (pdfFile) => {
     try {
-        // Pin the PDF file to IPFS and get its hash
+        console.log('Uploading pdf to IPFS...', pdfFile);
         const { IpfsHash: pdfIpfsHash } = await ipfs.pinFileToIPFS(pdfFile.path, pdfFile.filename);
-        fs.unlinkSync(pdfFile.path); // Remove the PDF file from local storage
+        fs.unlinkSync(pdfFile.path);
+        return pdfIpfsHash;
+    } catch (error) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error uploading pdf: ${error.message}`);
+    }
+}
 
-        // Create the certificate information object
-        const info = {
-            name: reqBody.name,
-            identityNumber: reqBody.identityNumber,
-            institution: reqBody.institution,
-            type: reqBody.type,
-            score: reqBody.score,
-            expireDate: reqBody.expireDate,
-        };
+const uploadJson = async (body) => {
+    try {
+        const customName = `${body.holder}_${body.hashInfo.slice(2)}`;
+        const { IpfsHash: jsonIpfsHash } = await ipfs.uploadJSONToIPFS(body, customName);
+        return jsonIpfsHash;
+    } catch (error) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error uploading json: ${error.message}`);
+    }
+}
 
-        console.log('info', reqBody.note);
-
-        // Create the certificate object
-        const cert = {
-            holder: reqBody.holder,
-            pdf: pdfIpfsHash,
-            info,
-        };
-
-        // Hash the certificate information
-        const hashInfo = hashObject(info);
-
-        // Create a custom name for the IPFS JSON upload
-        const customName = `${reqBody.holder}_${hashInfo.slice(2)}`;
-
-        // Upload the certificate object to IPFS as JSON
-        const { IpfsHash: jsonIpfsHash } = await ipfs.uploadJSONToIPFS(cert, customName);
-
-        // Get the IPFS file reference (IPNS)
-        const ipns = await ipfs.getFile(jsonIpfsHash);
-
-        // Issue the certificate on the blockchain
-        const tx = await contract.issueCertificate(reqBody.holder, jsonIpfsHash, hashInfo, reqBody.note, { from: reqBody.msgSender });
-
-        // Wait for the transaction to be confirmed
-        const receipt = await tx.wait();
-
-        // Extract the certificate hash from the transaction logs
-        const certHash = receipt.logs
-            .map(log => contract.interface.parseLog(log))
-            .find(log => log.name === 'CertificateIssued')?.args._certificateHash;
-
-        if (!certHash) {
-            throw new Error('CertificateIssued event not found in transaction logs');
-        }
-
-        const cred = await addCredential(certHash, reqBody.holder, reqBody.expireDate);
-
+const issueCredential = async (body) => {
+    try {
+        const cred = await addCredential(body.certHash, body.holder, body.expireDate);
+        await cred.save();
         // Return the success response
         return {
             message: 'Credential Issued Successfully!',
-            certificateHash: certHash,
-            ipfs: ipns,
+            certificateHash: body.certHash,
+            ipfs: body.jsonIpfsHash,
+            pdfsHash: body.pdfIpfsHash,
             credential: cred,
-            transactionHash: receipt.hash,
+            transactionHash: body.txHash,
         };
     } catch (error) {
         // Handle any errors that occur during the process
@@ -161,6 +129,9 @@ const issueCredential = async (reqBody, pdfFile) => {
 
 const getCredentialsByHolderAddress = async (holder) => {
     try {
+        const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
+        const contract = new ethers.Contract(config.L2_CRED, abiCred, wallet);
+
         const credentials = await getListCred(holder);
 
         const listCerts = await contract.getCertificatesByList(holder, credentials, { from: config.ACCOUNT_ADDRESS });
@@ -186,6 +157,8 @@ const getCredentialsByHolderAddress = async (holder) => {
 
 const getCredentialByHash = async (body, hash) => {
     try {
+        const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
+        const contract = new ethers.Contract(config.L2_CRED, abiCred, wallet);
         const certificate = await contract.getCertificateByHash(body.holder, hash, { from: body.msgSender });
         const certificateJson = {
             holder: certificate[0],
@@ -202,33 +175,18 @@ const getCredentialByHash = async (body, hash) => {
     }
 };
 
-const revokeCredential = async (body, hash) => {
-    try {
-        const tx = await contract.revokeCertificate(body.holder, hash, body.reason, {
-            from: body.issuer
-        })
-        const receipt = await tx.wait();
-
-        const logs = receipt.logs.map(log => contract.interface.parseLog(log));
-        let _isRevoked = false;
-        for (const log of logs) {
-            if (log.name === 'RevokedCertificate') {
-                _isRevoked = log.args._isRevoked;
-                // console.log('Certificate hash:', log.args._certificateHash);
-                // console.log('args', log.args._isRevoked);
-            }
-        }
-
-        return {
-            message: 'Credential Revoked Successfully!',
-            reason: body.reason,
-            isRevoked: _isRevoked,
-            result: receipt
-        };
-    } catch (error) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error revoking credential: ' + error.message);
-    }
-}
+// const revokeCredential = async (body) => {
+//     try {
+//         return {
+//             message: 'Credential Revoked Successfully!',
+//             reason: body.reason,
+//             isRevoked: body.isRevoked,
+//             result: receipt
+//         };
+//     } catch (error) {
+//         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error revoking credential: ' + error.message);
+//     }
+// }
 
 
 module.exports = {
@@ -236,8 +194,10 @@ module.exports = {
     issueCredentialFromRequest,
     getCredentialsByHolderAddress,
     getCredentialByHash,
-    revokeCredential,
+    // revokeCredential,
     addCredential,
     getListCred,
+    uploadPdf,
+    uploadJson,
     // verifyCredential
 };

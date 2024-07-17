@@ -4,10 +4,10 @@ const abiIssuer = require('../utils/ABI/issuer.json');
 const { User } = require('../models');
 const { userRole } = require('../config/role.enum');
 
-const provider = new ethers.JsonRpcProvider(config.LOCAL_RPC);
+const provider = new ethers.JsonRpcProvider(config.L2_RPC);
 
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
-const contract = new ethers.Contract(config.ISSUER_CONTRACT, abiIssuer, wallet);
+const contract = new ethers.Contract(config.L2_ISSUER, abiIssuer, wallet);
 
 /**
  * Add a new issuer
@@ -15,12 +15,18 @@ const contract = new ethers.Contract(config.ISSUER_CONTRACT, abiIssuer, wallet);
  * @param {string} issuer 
  * @returns {Promise<Object>}
  */
-const addIssuer = async (msgSender, issuer) => {
+const addIssuer = async (body) => {
     try {
-        const tx = await contract.addIssuer(issuer, { from: msgSender });
+        const recoveredAddress = ethers.utils.verifyMessage(body.data, body.signature);
+
+        if (recoveredAddress.toLowerCase() !== body.msgSender.toLowerCase()) {
+            return res.status(400).json({ error: 'Invalid signature' });
+        }
+
+        const tx = await contract.addIssuer(body.issuer, { from: body.msgSender });
         const receipt = await tx.wait();
 
-        const user = new User({ address: issuer, role: userRole.ISSUER });
+        const user = new User({ address: body.issuer, role: userRole.ISSUER });
         await user.save();
 
         return receipt;
