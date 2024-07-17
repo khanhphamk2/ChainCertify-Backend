@@ -13,7 +13,7 @@ router.route('/uploadJson').post(credentialController.uploadJson);
 
 router
     .route('/address/:hash')
-    .put(credentialController.revokeCredential)
+    // .put(credentialController.revokeCredential)
     .get(credentialController.getCredentialByHash);
 
 // router.route('/address/verify').post(credentialController.verifyCredential);

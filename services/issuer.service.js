@@ -4,10 +4,10 @@ const abiIssuer = require('../utils/ABI/issuer.json');
 const { User } = require('../models');
 const { userRole } = require('../config/role.enum');
 
-const provider = new ethers.JsonRpcProvider(config.LOCAL_RPC);
+const provider = new ethers.JsonRpcProvider(config.L2_RPC);
 
 const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
-const contract = new ethers.Contract(config.ISSUER_CONTRACT, abiIssuer, wallet);
+const contract = new ethers.Contract(config.L2_ISSUER, abiIssuer, wallet);
 
 /**
  * Add a new issuer

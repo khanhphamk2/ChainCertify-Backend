@@ -7,10 +7,8 @@ const abiCred = require('../utils/ABI/certificate.json');
 const ipfs = require('../utils/ipfs');
 const fs = require('fs');
 const { Credential } = require('../models');
-const exp = require('constants');
-const { json } = require('express');
 
-const provider = new ethers.JsonRpcProvider(config.RPC_LOCAL);
+const provider = new ethers.JsonRpcProvider(config.L2_RPC);
 
 const addCredential = async (certHash, holder, expireDate) => {
     try {
@@ -112,14 +110,6 @@ const uploadJson = async (body) => {
 
 const issueCredential = async (body) => {
     try {
-        // const temp = {
-        //     certHash,
-        //     holder,
-        //     expireDate,
-        //     jsonIpfsHash,
-        //     txHash,
-        // };
-
         const cred = await addCredential(body.certHash, body.holder, body.expireDate);
         await cred.save();
         // Return the success response
@@ -128,8 +118,8 @@ const issueCredential = async (body) => {
             certificateHash: body.certHash,
             ipfs: body.jsonIpfsHash,
             pdfsHash: body.pdfIpfsHash,
-            credential: body.cred,
-            transactionHash: body.hash,
+            credential: cred,
+            transactionHash: body.txHash,
         };
     } catch (error) {
         // Handle any errors that occur during the process
@@ -139,6 +129,9 @@ const issueCredential = async (body) => {
 
 const getCredentialsByHolderAddress = async (holder) => {
     try {
+        const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
+        const contract = new ethers.Contract(config.L2_CRED, abiCred, wallet);
+
         const credentials = await getListCred(holder);
 
         const listCerts = await contract.getCertificatesByList(holder, credentials, { from: config.ACCOUNT_ADDRESS });
@@ -164,6 +157,8 @@ const getCredentialsByHolderAddress = async (holder) => {
 
 const getCredentialByHash = async (body, hash) => {
     try {
+        const wallet = new ethers.Wallet(config.PRIVATE_KEY, provider);
+        const contract = new ethers.Contract(config.L2_CRED, abiCred, wallet);
         const certificate = await contract.getCertificateByHash(body.holder, hash, { from: body.msgSender });
         const certificateJson = {
             holder: certificate[0],
@@ -180,33 +175,18 @@ const getCredentialByHash = async (body, hash) => {
     }
 };
 
-const revokeCredential = async (body, hash) => {
-    try {
-        const tx = await contract.revokeCertificate(body.holder, hash, body.reason, {
-            from: body.issuer
-        })
-        const receipt = await tx.wait();
-
-        const logs = receipt.logs.map(log => contract.interface.parseLog(log));
-        let _isRevoked = false;
-        for (const log of logs) {
-            if (log.name === 'RevokedCertificate') {
-                _isRevoked = log.args._isRevoked;
-                // console.log('Certificate hash:', log.args._certificateHash);
-                // console.log('args', log.args._isRevoked);
-            }
-        }
-
-        return {
-            message: 'Credential Revoked Successfully!',
-            reason: body.reason,
-            isRevoked: _isRevoked,
-            result: receipt
-        };
-    } catch (error) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error revoking credential: ' + error.message);
-    }
-}
+// const revokeCredential = async (body) => {
+//     try {
+//         return {
+//             message: 'Credential Revoked Successfully!',
+//             reason: body.reason,
+//             isRevoked: body.isRevoked,
+//             result: receipt
+//         };
+//     } catch (error) {
+//         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error revoking credential: ' + error.message);
+//     }
+// }
 
 
 module.exports = {
@@ -214,7 +194,7 @@ module.exports = {
     issueCredentialFromRequest,
     getCredentialsByHolderAddress,
     getCredentialByHash,
-    revokeCredential,
+    // revokeCredential,
     addCredential,
     getListCred,
     uploadPdf,
