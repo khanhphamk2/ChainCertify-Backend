@@ -4,7 +4,7 @@ const upload = require('../middlewares/upload');
 
 const router = express.Router();
 
-router.route('/address').post(upload.single('pdfFile'), credentialController.issueCredential)
+router.route('/address').post(credentialController.issueCredential);
 
 router.route('/:address').get(credentialController.getCredentialsByHolderAddress);
 

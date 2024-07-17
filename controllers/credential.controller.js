@@ -3,7 +3,6 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 
 const issueCredential = catchAsync(async (req, res) => {
-    // const jsonData = JSON.parse(req.body.jsonData);
     const cert = await credentialService.issueCredential(req.body);
     res.status(httpStatus.CREATED).json({ certificate: cert });
 });
